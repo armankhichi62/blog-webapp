@@ -26,3 +26,8 @@ app.use(
 "/api/dashboard",
 require("./routes/dashboardRoutes")
 );
+
+app.use(
+  "/api/blog",
+  require("./routes/blogRoutes")
+);
