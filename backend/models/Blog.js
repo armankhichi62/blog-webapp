@@ -18,14 +18,21 @@ const blogSchema = new mongoose.Schema(
 
   status: {
     type: String,
-    enum: ["draft", "pending", "published"],
+    enum: ["draft", "pending", "published","approved", "rejected"],
     default: "draft"
   },
 
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
+  },
+
+   likes:{
+    type:Number,
+    default:0
   }
+
+
 },
 {
   timestamps: true

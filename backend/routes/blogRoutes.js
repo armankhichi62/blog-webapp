@@ -1,7 +1,22 @@
 const express = require("express");
 const router = express.Router();
 
-const { createBlog } = require("../controllers/postController");
+const {
+  createBlog,
+  submitForReview,
+  getPendingBlogs,
+  approveBlog,
+  rejectBlog,
+  getPublishedBlogs,
+  getBlogById,
+  updateBlog,
+  deleteBlog,
+  getDashboardStats,
+  likeBlog,
+  addComment
+
+
+} = require("../controllers/postController");
 
 const {
   protect,
@@ -14,5 +29,77 @@ router.post(
   authorize("author"),
   createBlog
 );
+
+router.put(
+  "/submit/:id",
+  protect,
+  authorize("author"),
+  submitForReview
+);
+
+router.get(
+  "/pending",
+  protect,
+  authorize("admin","superadmin"),
+  getPendingBlogs
+);
+
+router.put(
+  "/approve/:id",
+  protect,
+  authorize("admin"),
+  approveBlog
+);
+
+router.put(
+  "/reject/:id",
+  protect,
+  authorize("admin"),
+  rejectBlog
+);
+
+router.get(
+  "/published",
+  getPublishedBlogs
+);
+
+router.get(
+  "/:id",
+  getBlogById
+);
+
+router.put(
+  "/update/:id",
+  protect,
+  authorize("author"),
+  updateBlog
+);
+
+router.delete(
+  "/delete/:id",
+  protect,
+  authorize("author","admin"),
+  deleteBlog
+);
+
+router.get(
+  "/stats/dashboard",
+  protect,
+  authorize("admin"),
+  getDashboardStats
+);
+
+router.put(
+  "/like/:id",
+  protect,
+  likeBlog
+);
+
+router.post(
+  "/comment/:blogId",
+  protect,
+  addComment
+);
+
 
 module.exports = router;

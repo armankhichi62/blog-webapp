@@ -6,17 +6,14 @@ try{
 
 let token;
 
-if(
-req.headers.authorization &&
-req.headers.authorization.startsWith("Bearer")
-){
-
-token=req.headers.authorization.split(" ")[1];
-
+if (
+  req.headers.authorization &&
+  req.headers.authorization.toLowerCase().startsWith("bearer")
+) {
+  token = req.headers.authorization.split(" ")[1];
 }
 
 if(!token){
-
 return res.status(401).json({
 message:"Not authorized"
 });
@@ -29,7 +26,6 @@ process.env.JWT_SECRET
 );
 
 req.user=decoded;
-
 next();
 
 }
@@ -44,22 +40,15 @@ message:"Invalid Token"
 };
 
 // Role Middleware
-exports.authorize=(...roles)=>{
+exports.authorize = (...roles) => {
+  return (req, res, next) => {
 
-return(req,res,next)=>{
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: "Access Denied"
+      });
+    }
 
-if(!roles.includes(req.user.role)){
-
-return res.status(403).json({
-
-message:"Access Denied"
-
-});
-
-}
-
-next();
-
-};
-
+    next();
+  };
 };
