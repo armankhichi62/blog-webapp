@@ -84,7 +84,7 @@ const deleteBlog = async (id:string) => {
 
   return (
     <div
-      className="min-h-screen px-6 py-12"
+      className="page-shell min-h-screen px-4 py-12 sm:px-6 sm:py-16"
       style={{ background: "var(--bg-base)" }}
     >
       <div className="max-w-4xl mx-auto">
@@ -103,7 +103,7 @@ const deleteBlog = async (id:string) => {
             </svg>
             Back to Dashboard
           </a>
-          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
+          <p className="eyebrow mb-2">
             My Content
           </p>
           <div className="flex items-end justify-between">
@@ -144,7 +144,7 @@ const deleteBlog = async (id:string) => {
             <a
               href="/dashboard/create"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
-              style={{ background: "var(--accent)", color: "#0d0f14" }}
+              style={{ background: "var(--primary)", color: "#ffffff" }}
             >
               Create Post
             </a>
@@ -156,23 +156,13 @@ const deleteBlog = async (id:string) => {
               return (
                 <div
                   key={blog._id}
-                  className={`rounded-2xl border p-6 transition-all duration-200 animate-fade-up`}
+                  className="surface-card surface-card-hover p-5 animate-fade-up sm:p-6"
                   style={{
-                    background: "var(--bg-surface)",
-                    borderColor: "var(--bg-border)",
                     animationDelay: `${(i + 2) * 0.05}s`,
                     opacity: 0,
                   }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "var(--bg-elevated)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "var(--bg-surface)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "var(--bg-border)";
-                  }}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
                     <div className="flex-1 min-w-0">
                       <h2
                         className="font-semibold text-base mb-1.5 truncate"
@@ -195,7 +185,7 @@ const deleteBlog = async (id:string) => {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col items-end gap-3">
+                    <div className="flex w-full flex-col items-start gap-3 sm:w-auto sm:items-end">
 
                       <div className="flex flex-col items-end">
                         <span
@@ -218,7 +208,7 @@ const deleteBlog = async (id:string) => {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <button
                           onClick={() => router.push(`/dashboard/edit/${blog._id}`)}
                           className="px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer"
@@ -235,8 +225,8 @@ const deleteBlog = async (id:string) => {
                             onClick={() => submitForReview(blog._id)}
                             className="px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer"
                             style={{
-                              background: "var(--accent)",
-                              color: "#0d0f14"
+                              background: "var(--primary)",
+                              color: "#ffffff"
                             }}
                           >
                             Submit For Review

@@ -67,7 +67,7 @@ export default function EditBlogPage() {
 
   return (
     <div
-      className="min-h-screen px-6 py-12"
+      className="page-shell min-h-screen px-4 py-12 sm:px-6 sm:py-16"
       style={{ background: "var(--bg-base)" }}
     >
       <div className="max-w-2xl mx-auto">
@@ -84,7 +84,7 @@ export default function EditBlogPage() {
             </svg>
             Back to Dashboard
           </a>
-          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
+          <p className="eyebrow mb-2">
             Update Post
           </p>
           <h1
@@ -99,11 +99,9 @@ export default function EditBlogPage() {
         </div>
 
         <div
-          className="rounded-2xl border p-8 animate-fade-up stagger-2"
+          className="surface-card p-6 animate-fade-up stagger-2 sm:p-8"
           style={{
             background: "var(--bg-surface)",
-            borderColor: "var(--bg-border)",
-            boxShadow: "0 16px 48px rgba(0,0,0,0.3)",
           }}
         >
           {loading ? (
@@ -168,8 +166,8 @@ export default function EditBlogPage() {
                   disabled={saving || !title.trim() || !content.trim()}
                   className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
                   style={{
-                    background: saving || !title.trim() || !content.trim() ? "var(--bg-elevated)" : "var(--accent)",
-                    color: saving || !title.trim() || !content.trim() ? "var(--text-muted)" : "#0d0f14",
+                    background: saving || !title.trim() || !content.trim() ? "var(--bg-elevated)" : "var(--primary)",
+                    color: saving || !title.trim() || !content.trim() ? "var(--text-muted)" : "#ffffff",
                     cursor: saving || !title.trim() || !content.trim() ? "not-allowed" : "pointer",
                   }}
                 >

@@ -116,18 +116,18 @@ export default function Dashboard() {
 
   return (
     <div
-      className="min-h-screen px-6 py-12"
+      className="page-shell min-h-screen px-4 py-12 sm:px-6 sm:py-16"
       style={{ background: "var(--bg-base)" }}
     >
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
         <div className="mb-10 animate-fade-up stagger-1">
-          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
-            Dashboard
+          <p className="eyebrow mb-2">
+            Workspace overview
           </p>
           <h1
-            className="text-4xl font-semibold"
+            className="text-4xl font-semibold tracking-tight sm:text-5xl"
             style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
           >
             Welcome back
@@ -153,9 +153,14 @@ export default function Dashboard() {
                   { label: 'Likes Received', value: authorStats?.totalLikesReceived ?? 0 },
                   { label: 'Comments Received', value: authorStats?.totalCommentsReceived ?? 0 }
                 ].map((card) => (
-                  <div key={card.label} className="rounded-2xl border p-6 flex flex-col items-start justify-between" style={{ background: 'var(--bg-surface)', borderColor: 'var(--bg-border)' }}>
-                    <div className="text-sm text-muted" style={{ color: 'var(--text-muted)' }}>{card.label}</div>
-                    <div className="mt-3 text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{card.value}</div>
+                  <div key={card.label} className="surface-card surface-card-hover flex min-h-32 flex-col items-start justify-between p-5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-600">
+                      {card.label.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="mt-4 text-2xl font-bold text-slate-900">{card.value}</div>
+                      <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">{card.label}</div>
+                    </div>
                   </div>
                 ))
               )}
@@ -167,10 +172,10 @@ export default function Dashboard() {
 
             <div className="space-y-3">
               {(authorStats?.blogPerformance || []).map((b:any) => (
-                <div key={b._id || b.title} className="rounded-2xl border p-4 flex items-center justify-between" style={{ background: 'var(--bg-surface)', borderColor: 'var(--bg-border)' }}>
+                <div key={b._id || b.title} className="surface-card flex items-center justify-between p-4">
                   <div>
                     <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{b.title}</div>
-                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{b.status}</div>
+                    <div className="mt-1 inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-bold capitalize text-green-700">{b.status}</div>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2"><span>👍</span><span className="font-medium">{b.likes ?? 0}</span></div>
@@ -186,23 +191,9 @@ export default function Dashboard() {
               <a
                 key={item.href}
                 href={item.href}
-                className={`group rounded-2xl border p-6 flex items-start gap-4 transition-all duration-250 animate-fade-up stagger-${i + 2} cursor-pointer`}
+                className={`surface-card surface-card-hover group flex items-start gap-4 p-6 animate-fade-up stagger-${i + 2}`}
                 style={{
-                  background: "var(--bg-surface)",
-                  borderColor: "var(--bg-border)",
                   textDecoration: "none",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = item.accent;
-                  (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = `0 12px 32px rgba(0,0,0,0.3)`;
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "var(--bg-border)";
-                  (e.currentTarget as HTMLElement).style.background = "var(--bg-surface)";
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
                 }}
               >
                 <div

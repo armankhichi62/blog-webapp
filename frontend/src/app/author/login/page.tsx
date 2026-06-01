@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import api from "../../../services/api";
 import { useAuth } from "../../../context/AuthContext";
+import AuthVisual from "../../../components/AuthVisual";
 
 export default function AuthorLoginPage() {
   const router = useRouter();
@@ -32,25 +33,27 @@ export default function AuthorLoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "var(--bg-base)" }}
+      className="auth-shell min-h-screen px-4 py-10 sm:px-6"
     >
       <div
-        className="relative w-full max-w-md animate-fade-up"
+        className="mx-auto grid w-full max-w-5xl gap-6 animate-fade-up lg:grid-cols-[1.05fr_0.95fr]"
         style={{ animationDuration: "0.5s" }}
       >
+        <AuthVisual
+          eyebrow="Author workspace"
+          title="Write with clarity. Publish with confidence."
+          description="Manage drafts, submit stories for review, and keep an eye on reader engagement from one focused workspace."
+        />
         <div
-          className="rounded-2xl border p-8"
+          className="auth-card rounded-3xl p-7 sm:p-9"
           style={{
             background: "var(--bg-surface)",
-            borderColor: "var(--bg-border)",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.16)",
           }}
         >
           <div className="mb-8">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold mb-5"
-              style={{ background: "var(--accent)", color: "#0d0f14" }}
+              style={{ background: "var(--primary)", color: "#ffffff" }}
             >
               Iw
             </div>
@@ -99,8 +102,8 @@ export default function AuthorLoginPage() {
               disabled={loading}
               className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
               style={{
-                background: loading ? "var(--accent-dim)" : "var(--accent)",
-                color: "#0d0f14",
+                background: loading ? "#93c5fd" : "var(--primary)",
+                color: "#ffffff",
                 opacity: loading ? 0.7 : 1,
               }}
             >
@@ -109,7 +112,7 @@ export default function AuthorLoginPage() {
           </div>
 
           <p className="mt-6 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-            Need an account? <a href="/author/register" style={{ color: "var(--accent)" }} className="hover:underline">Register here</a>
+            Need an account? <a href="/author/register" style={{ color: "var(--primary)" }} className="font-semibold hover:underline">Register here</a>
           </p>
         </div>
       </div>

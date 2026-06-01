@@ -24,10 +24,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen px-6 py-12" style={{ background: "var(--bg-base)" }}>
+    <div className="page-shell min-h-screen px-4 py-12 sm:px-6 sm:py-16" style={{ background: "var(--bg-base)" }}>
       <div className="max-w-3xl mx-auto">
         <div className="mb-8 animate-fade-up stagger-1">
-          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
+          <p className="eyebrow mb-2">
             Profile
           </p>
           <h1 className="text-4xl font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
@@ -70,7 +70,7 @@ export default function ProfilePage() {
             <button
               onClick={logout}
               className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold"
-              style={{ background: "var(--accent)", color: "#0d0f14" }}
+              style={{ background: "var(--primary)", color: "#ffffff" }}
             >
               Logout
             </button>

@@ -14,6 +14,12 @@ const CATEGORIES = [
   "Career"
 ];
 
+const getAuthor = (blog: any) => blog.author?.name || blog.authorName || "Inkwell writer";
+const getDate = (blog: any) => {
+  const value = blog.publishedAt || blog.createdAt;
+  return value ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Recently published";
+};
+
 export default function BlogsPage() {
   const { user, isAuthenticated } = useAuth();
 
@@ -163,24 +169,24 @@ console.log(error.response?.data);
 
   return (
     <div
-      className="min-h-screen px-6 py-12"
+      className="page-shell min-h-screen px-4 py-12 sm:px-6 sm:py-16"
       style={{ background: "var(--bg-base)" }}
     >
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
 
         {/* Header */}
         <div className="mb-10 text-center animate-fade-up stagger-1">
-          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
-            Reading
+          <p className="eyebrow mb-2">
+            Explore the library
           </p>
           <h1
-            className="text-4xl font-semibold mb-3"
+            className="text-4xl font-semibold tracking-tight mb-3 sm:text-5xl"
             style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
           >
             Published Blogs
           </h1>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Discover stories, ideas, and perspectives from our community.
+          <p className="text-sm leading-6 sm:text-base" style={{ color: "var(--text-secondary)" }}>
+            Find useful stories, fresh ideas, and perspectives from our writing community.
           </p>
         </div>
 
@@ -191,7 +197,7 @@ console.log(error.response?.data);
             placeholder="Search blogs by title..."
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full px-5 py-3 rounded-xl border text-sm"
+            className="w-full px-5 py-4 rounded-2xl border text-sm shadow-sm"
             style={{
               background: "var(--bg-surface)",
               borderColor: "var(--bg-border)",
@@ -210,8 +216,8 @@ console.log(error.response?.data);
               onClick={() => handleCategoryClick(null)}
               className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer"
               style={{
-                background: selectedCategory === null ? "var(--accent)" : "var(--bg-surface)",
-                color: selectedCategory === null ? "#0d0f14" : "var(--text-secondary)",
+                background: selectedCategory === null ? "var(--primary)" : "var(--bg-surface)",
+                color: selectedCategory === null ? "#ffffff" : "var(--text-secondary)",
                 border: selectedCategory === null ? "none" : `1px solid var(--bg-border)`,
               }}
             >
@@ -223,8 +229,8 @@ console.log(error.response?.data);
                 onClick={() => handleCategoryClick(category)}
                 className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer"
                 style={{
-                  background: selectedCategory === category ? "var(--accent)" : "var(--bg-surface)",
-                  color: selectedCategory === category ? "#0d0f14" : "var(--text-secondary)",
+                  background: selectedCategory === category ? "var(--primary)" : "var(--bg-surface)",
+                  color: selectedCategory === category ? "#ffffff" : "var(--text-secondary)",
                   border: selectedCategory === category ? "none" : `1px solid var(--bg-border)`,
                 }}
               >
@@ -260,7 +266,7 @@ console.log(error.response?.data);
               <button
                 onClick={clearFilters}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-                style={{ background: "var(--accent)", color: "#0d0f14" }}
+                style={{ background: "var(--primary)", color: "#ffffff" }}
               >
                 Clear Filters
               </button>
@@ -271,10 +277,8 @@ console.log(error.response?.data);
             {blogs.map((blog, i) => (
               <article
                 key={blog._id}
-                className="rounded-2xl border overflow-hidden animate-fade-up"
+                className="surface-card surface-card-hover overflow-hidden animate-fade-up"
                 style={{
-                  background: "var(--bg-surface)",
-                  borderColor: "var(--bg-border)",
                   animationDelay: `${(i + 4) * 0.05}s`,
                   opacity: 0,
                 }}
@@ -283,20 +287,21 @@ console.log(error.response?.data);
                 <div className="p-7">
 
                   {/* Category + meta row */}
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                     {blog.category && (
                       <span
-                        className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-                        style={{ background: "var(--accent-glow)", color: "var(--accent)" }}
+                        className="text-xs font-semibold px-3 py-1 rounded-full"
+                        style={{ background: "var(--primary-soft)", color: "var(--primary)" }}
                       >
                         {blog.category}
                       </span>
                     )}
+                    <span className="text-xs font-medium text-slate-400">{getDate(blog)}</span>
                   </div>
 
                   {/* Title */}
                   <h2
-                    className="text-xl font-semibold mb-3 leading-snug"
+                    className="text-2xl font-semibold mb-3 leading-snug"
                     style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
                   >
                     {blog.title}
@@ -304,7 +309,7 @@ console.log(error.response?.data);
 
                   {/* Content */}
                   <p
-                    className="text-sm leading-relaxed"
+                    className="text-sm leading-7"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     {blog.content}
@@ -316,7 +321,13 @@ console.log(error.response?.data);
                 <div className="border-t" style={{ borderColor: "var(--bg-border)" }} />
 
                 {/* Actions row */}
-                <div className="px-7 py-4 flex items-center gap-3" style={{ background: "var(--bg-elevated)" }}>
+                <div className="px-7 py-4 flex flex-wrap items-center justify-between gap-3" style={{ background: "var(--bg-elevated)" }}>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                      {getAuthor(blog).charAt(0).toUpperCase()}
+                    </span>
+                    {getAuthor(blog)}
+                  </div>
 
                   {/* Like button */}
                   <button
@@ -324,7 +335,7 @@ console.log(error.response?.data);
                     disabled={likingId === blog._id}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200 cursor-pointer"
                     style={{
-                      background: "transparent",
+                      background: "#ffffff",
                       color: hasLiked(blog) ? "#ef4444" : "var(--text-secondary)",
                       borderColor: hasLiked(blog) ? "rgba(239,68,68,0.3)" : "var(--bg-border)",
                       opacity: likingId === blog._id ? 0.6 : 1,
@@ -350,9 +361,9 @@ console.log(error.response?.data);
 
                     {/* Comment Input */}
                     <div
-                      className="mt-5 rounded-xl p-4"
+                      className="mx-4 mt-5 rounded-xl p-4 sm:mx-7"
                       style={{
-                        background: "rgba(255,255,255,0.02)",
+                        background: "var(--bg-elevated)",
                         border: "1px solid var(--bg-border)"
                       }}
                     >
@@ -387,11 +398,11 @@ console.log(error.response?.data);
                             background:
                               commentingId === blog._id
                                 ? "var(--bg-border)"
-                                : "var(--accent)",
+                                : "var(--primary)",
                             color:
                               commentingId === blog._id
                                 ? "var(--text-muted)"
-                                : "#0d0f14",
+                                : "#ffffff",
                           }}
                         >
                           {commentingId === blog._id
@@ -405,7 +416,7 @@ console.log(error.response?.data);
 
                                 {/* Comments List */}
                               <div
-  className="mt-5"
+  className="mx-4 mb-6 mt-5 sm:mx-7"
   style={{ borderColor: "var(--bg-border)" }}
 >
 
@@ -425,7 +436,7 @@ console.log(error.response?.data);
       className="rounded-xl border p-4 mb-3"
       style={{
         borderColor: "var(--bg-border)",
-        background: "rgba(255,255,255,0.02)"
+        background: "var(--bg-elevated)"
       }}
     >
       <p className="font-semibold">

@@ -43,7 +43,7 @@ export default function CreateBlog() {
 
   return (
     <div
-      className="min-h-screen px-6 py-12"
+      className="page-shell min-h-screen px-4 py-12 sm:px-6 sm:py-16"
       style={{ background: "var(--bg-base)" }}
     >
       <div className="max-w-2xl mx-auto">
@@ -62,7 +62,7 @@ export default function CreateBlog() {
             </svg>
             Back to Dashboard
           </a>
-          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
+          <p className="eyebrow mb-2">
             New Post
           </p>
           <h1
@@ -78,11 +78,9 @@ export default function CreateBlog() {
 
         {/* Form card */}
         <div
-          className="rounded-2xl border p-8 animate-fade-up stagger-2"
+          className="surface-card p-6 animate-fade-up stagger-2 sm:p-8"
           style={{
             background: "var(--bg-surface)",
-            borderColor: "var(--bg-border)",
-            boxShadow: "0 16px 48px rgba(0,0,0,0.3)",
           }}
         >
           <div className="space-y-6">
@@ -144,17 +142,17 @@ export default function CreateBlog() {
                 disabled={loading || !title || !content}
                 className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
                 style={{
-                  background: (loading || !title || !content) ? "var(--bg-elevated)" : "var(--accent)",
-                  color: (loading || !title || !content) ? "var(--text-muted)" : "#0d0f14",
+                  background: (loading || !title || !content) ? "var(--bg-elevated)" : "var(--primary)",
+                  color: (loading || !title || !content) ? "var(--text-muted)" : "#ffffff",
                   cursor: (loading || !title || !content) ? "not-allowed" : "pointer",
                 }}
                 onMouseEnter={(e) => {
                   if (!loading && title && content)
-                    (e.currentTarget as HTMLElement).style.background = "var(--accent-dim)";
+                    (e.currentTarget as HTMLElement).style.background = "var(--primary-dark)";
                 }}
                 onMouseLeave={(e) => {
                   if (!loading && title && content)
-                    (e.currentTarget as HTMLElement).style.background = "var(--accent)";
+                    (e.currentTarget as HTMLElement).style.background = "var(--primary)";
                 }}
               >
                 {loading ? (

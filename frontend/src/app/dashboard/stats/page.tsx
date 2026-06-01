@@ -54,6 +54,28 @@ const statCards = [
     color: "#ef4444",
     bg: "rgba(239,68,68,0.12)",
   },
+  {
+    key: "totalLikes",
+    label: "Total Likes",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+    ),
+    color: "#e11d48",
+    bg: "rgba(225,29,72,0.1)",
+  },
+  {
+    key: "totalComments",
+    label: "Total Comments",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+      </svg>
+    ),
+    color: "#7c3aed",
+    bg: "rgba(124,58,237,0.1)",
+  },
 ];
 
 export default function StatsPage() {
@@ -82,9 +104,15 @@ export default function StatsPage() {
     ? Math.round((stats.approvedBlogs / stats.totalBlogs) * 100)
     : 0;
 
+  const getStatValue = (key: string) => {
+    if (key === "totalLikes") return stats.totalLikes ?? stats.totalLikesReceived ?? 0;
+    if (key === "totalComments") return stats.totalComments ?? stats.totalCommentsReceived ?? 0;
+    return stats[key] ?? 0;
+  };
+
   return (
     <div
-      className="min-h-screen px-6 py-12"
+      className="page-shell min-h-screen px-4 py-12 sm:px-6 sm:py-16"
       style={{ background: "var(--bg-base)" }}
     >
       <div className="max-w-5xl mx-auto">
@@ -103,7 +131,7 @@ export default function StatsPage() {
             </svg>
             Back to Dashboard
           </a>
-          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
+          <p className="eyebrow mb-2">
             Analytics
           </p>
           <h1
@@ -126,14 +154,12 @@ export default function StatsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               {statCards.map((card, i) => (
                 <div
                   key={card.key}
-                  className="rounded-2xl border p-5 animate-fade-up"
+                  className="surface-card surface-card-hover p-5 animate-fade-up"
                   style={{
-                    background: "var(--bg-surface)",
-                    borderColor: "var(--bg-border)",
                     animationDelay: `${(i + 2) * 0.05}s`,
                     opacity: 0,
                   }}
@@ -147,7 +173,7 @@ export default function StatsPage() {
                     </div>
                   </div>
                   <p className="text-3xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>
-                    {stats[card.key] ?? 0}
+                    {getStatValue(card.key)}
                   </p>
                   <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                     {card.label}

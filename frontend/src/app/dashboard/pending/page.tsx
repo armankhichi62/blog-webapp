@@ -57,7 +57,7 @@ export default function PendingBlogs() {
 
   return (
     <div
-      className="min-h-screen px-6 py-12"
+      className="page-shell min-h-screen px-4 py-12 sm:px-6 sm:py-16"
       style={{ background: "var(--bg-base)" }}
     >
       <div className="max-w-4xl mx-auto">
@@ -76,7 +76,7 @@ export default function PendingBlogs() {
             </svg>
             Back to Dashboard
           </a>
-          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
+          <p className="eyebrow mb-2">
             Moderation
           </p>
           <div className="flex items-end justify-between">
@@ -136,7 +136,7 @@ export default function PendingBlogs() {
             {blogs.map((blog, i) => (
               <div
                 key={blog._id}
-                className="rounded-2xl border p-6 animate-fade-up"
+                className="surface-card p-6 animate-fade-up"
                 style={{
                   background: "var(--bg-surface)",
                   borderColor: "var(--bg-border)",

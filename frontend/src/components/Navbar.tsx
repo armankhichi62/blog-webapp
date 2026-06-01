@@ -1,36 +1,38 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { isAuthenticated, logout, user } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const role = user?.role?.toLowerCase();
 
   const publicLinks = [
     { href: "/", label: "Home" },
-    { href: "/blogs", label: "Blogs" },
-    { href: "/author/login", label: "User Login" },
-    { href: "/author/register", label: "User Register" },
-    { href: "/admin/login", label: "Admin Login" },
+    { href: "/blogs", label: "Explore" },
+    { href: "/author/login", label: "Sign in" },
+    { href: "/author/register", label: "Get started" },
+    { href: "/admin/login", label: "Admin" },
   ];
 
   const authorLinks = [
     { href: "/", label: "Home" },
-    { href: "/blogs", label: "Blogs" },
+    { href: "/blogs", label: "Explore" },
     { href: "/dashboard", label: "Dashboard" },
-    { href: "/dashboard/create", label: "Create Blog" },
+    { href: "/dashboard/create", label: "Write" },
     { href: "/dashboard/myblogs", label: "My Blogs" },
   ];
 
   const adminLinks = [
     { href: "/", label: "Home" },
-    { href: "/blogs", label: "Blogs" },
-    { href: "/dashboard/pending", label: "Pending Reviews" },
-    { href: "/dashboard/stats", label: "Statistics" },
-    { href: "/dashboard", label: "Moderation" },
+    { href: "/blogs", label: "Explore" },
+    { href: "/dashboard/pending", label: "Reviews" },
+    { href: "/dashboard/stats", label: "Analytics" },
+    { href: "/dashboard", label: "Dashboard" },
   ];
 
   const navLinks = isAuthenticated
@@ -45,83 +47,82 @@ export default function Navbar() {
   };
 
   return (
-    <nav
-      className="sticky top-0 z-50 border-b"
-      style={{
-        background: "rgba(13, 15, 20, 0.85)",
-        backdropFilter: "blur(12px)",
-        borderColor: "var(--bg-border)",
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
-
-        {/* Logo */}
-        <a href="/" className="flex items-center gap-2 group">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-transform group-hover:scale-105"
-            style={{ background: "var(--accent)", color: "#0d0f14" }}
-          >
+    <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <a href="/" className="group flex items-center gap-2.5" onClick={() => setMenuOpen(false)}>
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-sm font-black text-white shadow-md shadow-blue-200 transition-transform group-hover:scale-105">
             Iw
           </div>
-          <span
-            className="text-lg font-semibold tracking-tight"
-            style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
-          >
-            Inkwell
-          </span>
+          <div>
+            <span className="block text-lg font-bold tracking-tight text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+              Inkwell
+            </span>
+            <span className="hidden text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 sm:block">
+              Stories that matter
+            </span>
+          </div>
         </a>
 
-        {/* Nav links */}
-        <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-              style={{
-                color: isActive(link.href) ? "var(--accent)" : "var(--text-secondary)",
-                background: isActive(link.href) ? "var(--accent-glow)" : "transparent",
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive(link.href)) {
-                  (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
-                  (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive(link.href)) {
-                  (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
-                  (e.currentTarget as HTMLElement).style.background = "transparent";
-                }
-              }}
-            >
-              {link.label}
-              {isActive(link.href) && (
-                <span
-                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full"
-                  style={{ background: "var(--accent)" }}
-                />
-              )}
-            </a>
-          ))}
+        <div className="hidden items-center gap-1 md:flex">
+          {navLinks.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                className={`rounded-lg px-3.5 py-2 text-sm font-semibold ${
+                  active
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                {link.label}
+              </a>
+            );
+          })}
+          {isAuthenticated && (
+            <button onClick={logout} className="ml-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600">
+              Logout
+            </button>
+          )}
         </div>
 
-        {/* Logout */}
-        {isAuthenticated && (
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200 cursor-pointer"
-            style={{
-              color: "var(--text-secondary)",
-              borderColor: "var(--bg-border)",
-              background: "transparent",
-            }}
-          >
-            Logout
-          </button>
-        )}
-
+        <button
+          type="button"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-label="Toggle navigation menu"
+          aria-expanded={menuOpen}
+          className="rounded-lg border border-slate-200 p-2 text-slate-600 md:hidden"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            {menuOpen ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
+          </svg>
+        </button>
       </div>
+
+      {menuOpen && (
+        <div className="border-t border-slate-100 bg-white px-4 py-3 shadow-lg md:hidden">
+          <div className="mx-auto grid max-w-7xl gap-1">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className={`rounded-lg px-3 py-2.5 text-sm font-semibold ${
+                  isActive(link.href) ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {link.label}
+              </a>
+            ))}
+            {isAuthenticated && (
+              <button onClick={logout} className="rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-red-600 hover:bg-red-50">
+                Logout
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

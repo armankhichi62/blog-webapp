@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import api from "../../../services/api";
 import { useAuth } from "../../../context/AuthContext";
+import AuthVisual from "../../../components/AuthVisual";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -32,25 +33,27 @@ export default function AdminLoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "var(--bg-base)" }}
+      className="auth-shell min-h-screen px-4 py-10 sm:px-6"
     >
       <div
-        className="relative w-full max-w-md animate-fade-up"
+        className="mx-auto grid w-full max-w-5xl gap-6 animate-fade-up lg:grid-cols-[1.05fr_0.95fr]"
         style={{ animationDuration: "0.5s" }}
       >
+        <AuthVisual
+          eyebrow="Platform moderation"
+          title="Keep every published story worth reading."
+          description="Review submissions, monitor publishing activity, and maintain a high-quality reading experience for the Inkwell community."
+        />
         <div
-          className="rounded-2xl border p-8"
+          className="auth-card rounded-3xl p-7 sm:p-9"
           style={{
             background: "var(--bg-surface)",
-            borderColor: "var(--bg-border)",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.16)",
           }}
         >
           <div className="mb-8">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold mb-5"
-              style={{ background: "var(--accent)", color: "#0d0f14" }}
+              style={{ background: "var(--primary)", color: "#ffffff" }}
             >
               Iw
             </div>
@@ -99,8 +102,8 @@ export default function AdminLoginPage() {
               disabled={loading}
               className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
               style={{
-                background: loading ? "var(--accent-dim)" : "var(--accent)",
-                color: "#0d0f14",
+                background: loading ? "#93c5fd" : "var(--primary)",
+                color: "#ffffff",
                 opacity: loading ? 0.7 : 1,
               }}
             >
