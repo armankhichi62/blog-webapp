@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth, useRequireAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 
 const dashboardItems = [
   {
@@ -67,6 +68,9 @@ export default function Dashboard() {
   const { isAuthenticated } = useRequireAuth();
   const role = user?.role?.toLowerCase() ?? null;
 
+  const [authorStats, setAuthorStats] = useState<any | null>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+
   if (loading || !isAuthenticated) {
     return (
       <div
@@ -89,6 +93,23 @@ export default function Dashboard() {
 
     return true;
   });
+
+  useEffect(() => {
+    const fetchAuthorStats = async () => {
+      if (role !== 'author') return;
+      setLoadingStats(true);
+      try {
+        const res = await api.get('/blog/stats/author');
+        setAuthorStats(res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    fetchAuthorStats();
+  }, [role]);
 
   return (
     <div
@@ -114,57 +135,101 @@ export default function Dashboard() {
         </div>
 
         {/* Cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {filteredItems.map((item, i) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={`group rounded-2xl border p-6 flex items-start gap-4 transition-all duration-250 animate-fade-up stagger-${i + 2} cursor-pointer`}
-              style={{
-                background: "var(--bg-surface)",
-                borderColor: "var(--bg-border)",
-                textDecoration: "none",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = item.accent;
-                (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
-                (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                (e.currentTarget as HTMLElement).style.boxShadow = `0 12px 32px rgba(0,0,0,0.3)`;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--bg-border)";
-                (e.currentTarget as HTMLElement).style.background = "var(--bg-surface)";
-                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "none";
-              }}
-            >
-              <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: item.accentBg, color: item.accent }}
+        {role === 'author' ? (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              {loadingStats ? (
+                <div className="col-span-4">Loading stats...</div>
+              ) : (
+                [
+                  { label: 'Total Blogs', value: authorStats?.totalBlogs ?? 0 },
+                  { label: 'Draft', value: authorStats?.draftBlogs ?? 0 },
+                  { label: 'Pending', value: authorStats?.pendingBlogs ?? 0 },
+                  { label: 'Approved', value: authorStats?.approvedBlogs ?? 0 },
+                  { label: 'Rejected', value: authorStats?.rejectedBlogs ?? 0 },
+                  { label: 'Likes Received', value: authorStats?.totalLikesReceived ?? 0 },
+                  { label: 'Comments Received', value: authorStats?.totalCommentsReceived ?? 0 }
+                ].map((card) => (
+                  <div key={card.label} className="rounded-2xl border p-6 flex flex-col items-start justify-between" style={{ background: 'var(--bg-surface)', borderColor: 'var(--bg-border)' }}>
+                    <div className="text-sm text-muted" style={{ color: 'var(--text-muted)' }}>{card.label}</div>
+                    <div className="mt-3 text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{card.value}</div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Blog Performance</h2>
+            </div>
+
+            <div className="space-y-3">
+              {(authorStats?.blogPerformance || []).map((b:any) => (
+                <div key={b._id || b.title} className="rounded-2xl border p-4 flex items-center justify-between" style={{ background: 'var(--bg-surface)', borderColor: 'var(--bg-border)' }}>
+                  <div>
+                    <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{b.title}</div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{b.status}</div>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2"><span>👍</span><span className="font-medium">{b.likes ?? 0}</span></div>
+                    <div className="flex items-center gap-2"><span>💬</span><span className="font-medium">{b.commentsCount ?? 0}</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filteredItems.map((item, i) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`group rounded-2xl border p-6 flex items-start gap-4 transition-all duration-250 animate-fade-up stagger-${i + 2} cursor-pointer`}
+                style={{
+                  background: "var(--bg-surface)",
+                  borderColor: "var(--bg-border)",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = item.accent;
+                  (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = `0 12px 32px rgba(0,0,0,0.3)`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--bg-border)";
+                  (e.currentTarget as HTMLElement).style.background = "var(--bg-surface)";
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                }}
               >
-                {item.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2
-                  className="font-semibold text-base mb-1"
-                  style={{ color: "var(--text-primary)" }}
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: item.accentBg, color: item.accent }}
                 >
-                  {item.label}
-                </h2>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  {item.description}
-                </p>
-              </div>
-              <svg
-                className="flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
-                style={{ color: "var(--text-muted)" }}
-                width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              >
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </a>
-          ))}
-        </div>
+                  {item.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2
+                    className="font-semibold text-base mb-1"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    {item.label}
+                  </h2>
+                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                    {item.description}
+                  </p>
+                </div>
+                <svg
+                  className="flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                  style={{ color: "var(--text-muted)" }}
+                  width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </a>
+            ))}
+          </div>
+        )}
 
       </div>
     </div>

@@ -33,13 +33,11 @@ exports.submitForReview = async (req, res) => {
       });
     }
 
-    if (req.user.role !== "admin" && req.user.role !== "superadmin") {
-      if (blog.author.toString() !== req.user.id.toString()) {
-        return res.status(403).json({
-          success: false,
-          message: "You do not have permission to submit this blog",
-        });
-      }
+    if (blog.author.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to submit this blog",
+      });
     }
 
     blog.status = "pending";
@@ -143,18 +141,16 @@ exports.getPublishedBlogs = async (req, res) => {
 //
 exports.getBlogById = async (req, res) => {
   try {
-
     const blog = await Blog.findById(req.params.id)
       .populate("author", "name email");
 
-    if (!blog) {
+    if (!blog || blog.status !== "approved") {
       return res.status(404).json({
-        message: "Blog not found"
+        message: "Blog not found",
       });
     }
 
     res.json(blog);
-
   } catch (error) {
     res.status(500).json(error.message);
   }
@@ -172,13 +168,11 @@ exports.updateBlog = async (req, res) => {
       });
     }
 
-    if (req.user.role !== "admin" && req.user.role !== "superadmin") {
-      if (blog.author.toString() !== req.user.id.toString()) {
-        return res.status(403).json({
-          success: false,
-          message: "You do not have permission to update this blog",
-        });
-      }
+    if (blog.author.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to update this blog",
+      });
     }
 
     blog.title = req.body.title?.trim() || blog.title;
@@ -209,13 +203,11 @@ exports.deleteBlog = async (req, res) => {
       });
     }
 
-    if (req.user.role !== "admin" && req.user.role !== "superadmin") {
-      if (blog.author.toString() !== req.user.id.toString()) {
-        return res.status(403).json({
-          success: false,
-          message: "You do not have permission to delete this blog",
-        });
-      }
+    if (blog.author.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to delete this blog",
+      });
     }
 
     await Blog.findByIdAndDelete(req.params.id);
@@ -271,6 +263,63 @@ error.message
 
 }
 
+};
+
+// Author analytics for author dashboard
+exports.getAuthorAnalytics = async (req, res) => {
+  try {
+    const authorId = req.user.id;
+
+    // Get all blogs for this author with comments count
+    const blogPerformance = await Blog.aggregate([
+      { $match: { author: require('mongoose').Types.ObjectId(authorId) } },
+      {
+        $lookup: {
+          from: 'comments',
+          localField: '_id',
+          foreignField: 'blog',
+          as: 'comments'
+        }
+      },
+      {
+        $addFields: {
+          commentsCount: { $size: '$comments' }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          status: 1,
+          likes: 1,
+          commentsCount: 1
+        }
+      }
+    ]);
+
+    const totalBlogs = blogPerformance.length;
+    const draftBlogs = blogPerformance.filter(b => (b.status || '').toLowerCase() === 'draft').length;
+    const pendingBlogs = blogPerformance.filter(b => (b.status || '').toLowerCase() === 'pending').length;
+    const approvedBlogs = blogPerformance.filter(b => (b.status || '').toLowerCase() === 'approved' || (b.status || '').toLowerCase() === 'published').length;
+    const rejectedBlogs = blogPerformance.filter(b => (b.status || '').toLowerCase() === 'rejected').length;
+
+    const totalLikesReceived = blogPerformance.reduce((acc, b) => acc + (b.likes || 0), 0);
+    const totalCommentsReceived = blogPerformance.reduce((acc, b) => acc + (b.commentsCount || 0), 0);
+
+    res.json({
+      totalBlogs,
+      draftBlogs,
+      pendingBlogs,
+      approvedBlogs,
+      rejectedBlogs,
+      totalLikesReceived,
+      totalCommentsReceived,
+      blogPerformance
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 
@@ -375,24 +424,40 @@ exports.likeBlog = async (req, res) => {
 
 
 //
-exports.getMyBlogs = async (req,res) => {
-
+exports.getMyBlogs = async (req, res) => {
   try {
-
-    let blogs;
-
-    if(req.user.role === "admin"){
-      blogs = await Blog.find();
-    } else {
-      blogs = await Blog.find({
-        author:req.user.id
-      });
-    }
+    // Aggregate blogs for the author and include commentsCount
+    const blogs = await Blog.aggregate([
+      { $match: { author: require('mongoose').Types.ObjectId(req.user.id) } },
+      {
+        $lookup: {
+          from: 'comments',
+          localField: '_id',
+          foreignField: 'blog',
+          as: 'comments'
+        }
+      },
+      {
+        $addFields: {
+          commentsCount: { $size: '$comments' }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          category: 1,
+          status: 1,
+          likes: 1,
+          commentsCount: 1,
+          content: 1
+        }
+      },
+      { $sort: { createdAt: -1 } }
+    ]);
 
     res.json(blogs);
-
-  } catch(error){
+  } catch (error) {
     res.status(500).json(error.message);
   }
-
 };

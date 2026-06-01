@@ -28,42 +28,42 @@ const {
 router.post(
   "/create",
   protect,
-  authorize("author","admin","superadmin"),
+  authorize("author"),
   createBlog
 );
 
 router.get(
-"/myblogs",
-protect,
-authorize("author","admin","superadmin"),
-getMyBlogs
+  "/myblogs",
+  protect,
+  authorize("author"),
+  getMyBlogs
 );
 
 router.put(
   "/submit/:id",
   protect,
-  authorize("author","admin"),
+  authorize("author"),
   submitForReview
 );
 
 router.get(
   "/pending",
   protect,
-  authorize("admin","superadmin"),
+  authorize("admin"),
   getPendingBlogs
 );
 
 router.put(
   "/approve/:id",
   protect,
-  authorize("admin","superadmin"),
+  authorize("admin"),
   approveBlog
 );
 
 router.put(
   "/reject/:id",
   protect,
-  authorize("admin","superadmin"),
+  authorize("admin"),
   rejectBlog
 );
 
@@ -75,7 +75,7 @@ router.get(
 router.put(
   "/update/:id",
   protect,
-  authorize("author","admin","superadmin"),
+  authorize("author"),
   updateBlog
 );
 
@@ -83,7 +83,7 @@ router.put(
 router.delete(
   "/delete/:id",
   protect,
-  authorize("author","admin","superadmin"),
+  authorize("author"),
   deleteBlog
 );
 
@@ -92,6 +92,13 @@ router.get(
   protect,
   authorize("admin"),
   getDashboardStats
+);
+
+router.get(
+  "/stats/author",
+  protect,
+  authorize("author"),
+  getAuthorAnalytics
 );
 
 router.put(

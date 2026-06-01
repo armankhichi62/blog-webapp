@@ -2,6 +2,25 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const createToken = (user) =>
+  jwt.sign(
+    {
+      id: user._id,
+      role: user.role,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+const buildUserResponse = (user) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+});
+
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -29,25 +48,36 @@ exports.register = async (req, res, next) => {
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
-      role: "reader",
+      role: "author",
     });
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
-      data: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      message: "Author registered successfully",
+      data: buildUserResponse(user),
     });
   } catch (error) {
     next(error);
   }
 };
 
-exports.login = async (req, res, next) => {
+const authenticateUser = async (email, password) => {
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await User.findOne({ email: normalizedEmail });
+
+  if (!user) {
+    return null;
+  }
+
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) {
+    return null;
+  }
+
+  return user;
+};
+
+exports.authorLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -58,45 +88,67 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = await User.findOne({ email: normalizedEmail });
-
+    const user = await authenticateUser(email, password);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
       return res.status(400).json({
         success: false,
         message: "Invalid credentials",
       });
     }
 
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
+    if (user.role !== "author") {
+      return res.status(403).json({
+        success: false,
+        message: "Author account required",
+      });
+    }
+
+    const token = createToken(user);
 
     res.json({
       success: true,
-      message: "Login successful",
+      message: "Author login successful",
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      user: buildUserResponse(user),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.adminLogin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    const user = await authenticateUser(email, password);
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    if (user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Admin account required",
+      });
+    }
+
+    const token = createToken(user);
+
+    res.json({
+      success: true,
+      message: "Admin login successful",
+      token,
+      user: buildUserResponse(user),
     });
   } catch (error) {
     next(error);

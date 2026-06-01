@@ -5,21 +5,40 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
 
-  const navLinks = [
+  const role = user?.role?.toLowerCase();
+
+  const publicLinks = [
     { href: "/", label: "Home" },
     { href: "/blogs", label: "Blogs" },
-    ...(isAuthenticated
-      ? [
-          { href: "/dashboard", label: "Dashboard" },
-          { href: "/profile", label: "Profile" },
-        ]
-      : [
-          { href: "/login", label: "Login" },
-          { href: "/register", label: "Register" },
-        ]),
+    { href: "/author/login", label: "User Login" },
+    { href: "/author/register", label: "User Register" },
+    { href: "/admin/login", label: "Admin Login" },
   ];
+
+  const authorLinks = [
+    { href: "/", label: "Home" },
+    { href: "/blogs", label: "Blogs" },
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/dashboard/create", label: "Create Blog" },
+    { href: "/dashboard/myblogs", label: "My Blogs" },
+    { href: "/dashboard/stats", label: "Analytics" },
+  ];
+
+  const adminLinks = [
+    { href: "/", label: "Home" },
+    { href: "/blogs", label: "Blogs" },
+    { href: "/dashboard/pending", label: "Pending Reviews" },
+    { href: "/dashboard/stats", label: "Statistics" },
+    { href: "/dashboard", label: "Moderation" },
+  ];
+
+  const navLinks = isAuthenticated
+    ? role === "admin"
+      ? adminLinks
+      : authorLinks
+    : publicLinks;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";

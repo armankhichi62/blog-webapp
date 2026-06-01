@@ -65,7 +65,7 @@ export default function Home() {
               Browse all posts
             </a>
             <a
-              href="/dashboard/create"
+              href="/author/register"
               className="px-6 py-3 rounded-xl text-sm font-semibold border transition-all"
               style={{ color: "var(--text-secondary)", borderColor: "var(--bg-border)", background: "transparent" }}
               onMouseEnter={(e) => {
