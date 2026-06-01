@@ -23,7 +23,6 @@ export default function Navbar() {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/dashboard/create", label: "Create Blog" },
     { href: "/dashboard/myblogs", label: "My Blogs" },
-    { href: "/dashboard/stats", label: "Analytics" },
   ];
 
   const adminLinks = [

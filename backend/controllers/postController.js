@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Blog = require("../models/Blog");
 const Comment = require("../models/Comment");
 //create blogs
@@ -268,11 +269,11 @@ error.message
 // Author analytics for author dashboard
 exports.getAuthorAnalytics = async (req, res) => {
   try {
-    const authorId = req.user.id;
+    const authorId = req.user.id || req.user._id;
 
     // Get all blogs for this author with comments count
     const blogPerformance = await Blog.aggregate([
-      { $match: { author: require('mongoose').Types.ObjectId(authorId) } },
+      { $match: { author: new mongoose.Types.ObjectId(authorId) } },
       {
         $lookup: {
           from: 'comments',
@@ -426,9 +427,11 @@ exports.likeBlog = async (req, res) => {
 //
 exports.getMyBlogs = async (req, res) => {
   try {
+    const authorId = req.user.id || req.user._id;
+
     // Aggregate blogs for the author and include commentsCount
     const blogs = await Blog.aggregate([
-      { $match: { author: require('mongoose').Types.ObjectId(req.user.id) } },
+      { $match: { author: new mongoose.Types.ObjectId(authorId) } },
       {
         $lookup: {
           from: 'comments',

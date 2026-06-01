@@ -71,6 +71,26 @@ export default function Dashboard() {
   const [authorStats, setAuthorStats] = useState<any | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
+  useEffect(() => {
+    const fetchAuthorStats = async () => {
+      if (role !== 'author') return;
+      setLoadingStats(true);
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const res = await api.get('/blog/stats/author', {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        setAuthorStats(res.data?.data ?? res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    fetchAuthorStats();
+  }, [role]);
+
   if (loading || !isAuthenticated) {
     return (
       <div
@@ -84,7 +104,7 @@ export default function Dashboard() {
 
   const filteredItems = dashboardItems.filter((item) => {
     if (role === "author") {
-      return item.href !== "/dashboard/pending";
+      return item.href !== "/dashboard/pending" && item.href !== "/dashboard/stats";
     }
 
     if (role === "admin") {
@@ -93,23 +113,6 @@ export default function Dashboard() {
 
     return true;
   });
-
-  useEffect(() => {
-    const fetchAuthorStats = async () => {
-      if (role !== 'author') return;
-      setLoadingStats(true);
-      try {
-        const res = await api.get('/blog/stats/author');
-        setAuthorStats(res.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingStats(false);
-      }
-    };
-
-    fetchAuthorStats();
-  }, [role]);
 
   return (
     <div

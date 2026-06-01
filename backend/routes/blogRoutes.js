@@ -12,6 +12,7 @@ const {
   updateBlog,
   deleteBlog,
   getDashboardStats,
+  getAuthorAnalytics,
   likeBlog,
   addComment,
   getComments,
