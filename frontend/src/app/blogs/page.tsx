@@ -4,6 +4,16 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 
+const CATEGORIES = [
+  "Technology",
+  "Programming",
+  "Web Development",
+  "AI/ML",
+  "Cyber Security",
+  "Database",
+  "Career"
+];
+
 export default function BlogsPage() {
   const { user, isAuthenticated } = useAuth();
 
@@ -13,6 +23,10 @@ export default function BlogsPage() {
   const [loading, setLoading] = useState(true);
   const [likingId, setLikingId] = useState<string | null>(null);
   const [commentingId, setCommentingId] = useState<string | null>(null);
+
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const fetchComments = async(blogId:string)=>{
 
@@ -36,9 +50,23 @@ console.log(error.response?.data);
 
 };
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = async (search?: string, category?: string | null) => {
     try {
-      const res = await api.get("/blog/published");
+      setLoading(true);
+      const params = new URLSearchParams();
+      
+      if (search && search.trim()) {
+        params.append("search", search.trim());
+      }
+      
+      if (category) {
+        params.append("category", category);
+      }
+
+      const queryString = params.toString();
+      const url = queryString ? `/blog/published?${queryString}` : "/blog/published";
+      
+      const res = await api.get(url);
       setBlogs(res.data);
       res.data.forEach((blog: any) => {
         fetchComments(blog._id);
@@ -48,6 +76,26 @@ console.log(error.response?.data);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle search input change
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    fetchBlogs(value, selectedCategory);
+  };
+
+  // Handle category filter click
+  const handleCategoryClick = (category: string | null) => {
+    const newCategory = selectedCategory === category ? null : category;
+    setSelectedCategory(newCategory);
+    fetchBlogs(searchQuery, newCategory);
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory(null);
+    fetchBlogs("", null);
   };
 
   const hasLiked = (blog: any) => {
@@ -136,6 +184,56 @@ console.log(error.response?.data);
           </p>
         </div>
 
+        {/* Search Bar */}
+        <div className="mb-8 animate-fade-up stagger-2">
+          <input
+            type="text"
+            placeholder="Search blogs by title..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="w-full px-5 py-3 rounded-xl border text-sm"
+            style={{
+              background: "var(--bg-surface)",
+              borderColor: "var(--bg-border)",
+              color: "var(--text-primary)",
+            }}
+          />
+        </div>
+
+        {/* Category Filters */}
+        <div className="mb-8 animate-fade-up stagger-3">
+          <p className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
+            Filter by category
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleCategoryClick(null)}
+              className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer"
+              style={{
+                background: selectedCategory === null ? "var(--accent)" : "var(--bg-surface)",
+                color: selectedCategory === null ? "#0d0f14" : "var(--text-secondary)",
+                border: selectedCategory === null ? "none" : `1px solid var(--bg-border)`,
+              }}
+            >
+              All
+            </button>
+            {CATEGORIES.map((category) => (
+              <button
+                key={category}
+                onClick={() => handleCategoryClick(category)}
+                className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer"
+                style={{
+                  background: selectedCategory === category ? "var(--accent)" : "var(--bg-surface)",
+                  color: selectedCategory === category ? "#0d0f14" : "var(--text-secondary)",
+                  border: selectedCategory === category ? "none" : `1px solid var(--bg-border)`,
+                }}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Blog list */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -145,11 +243,28 @@ console.log(error.response?.data);
           </div>
         ) : blogs.length === 0 ? (
           <div
-            className="rounded-2xl border p-12 text-center animate-fade-up stagger-2"
+            className="rounded-2xl border p-12 text-center animate-fade-up stagger-4"
             style={{ background: "var(--bg-surface)", borderColor: "var(--bg-border)" }}
           >
-            <p className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>No posts yet</p>
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Check back soon for new articles</p>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--bg-elevated)" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ color: "var(--text-muted)" }}>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <p className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>No blogs found</p>
+            <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>
+              {searchQuery || selectedCategory ? "Try a different search or category." : "Check back soon for new articles"}
+            </p>
+            {(searchQuery || selectedCategory) && (
+              <button
+                onClick={clearFilters}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                style={{ background: "var(--accent)", color: "#0d0f14" }}
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-6">
@@ -160,7 +275,7 @@ console.log(error.response?.data);
                 style={{
                   background: "var(--bg-surface)",
                   borderColor: "var(--bg-border)",
-                  animationDelay: `${(i + 2) * 0.05}s`,
+                  animationDelay: `${(i + 4) * 0.05}s`,
                   opacity: 0,
                 }}
               >

@@ -27,7 +27,7 @@ export default function EditBlogPage() {
       setError(null);
 
       try {
-        const res = await api.get(`/blog/${blogId}`);
+        const res = await api.get(`/blog/${blogId}/edit`);
         const blog = res.data;
         setTitle(blog.title || "");
         setContent(blog.content || "");

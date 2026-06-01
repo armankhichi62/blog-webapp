@@ -9,6 +9,7 @@ const {
   rejectBlog,
   getPublishedBlogs,
   getBlogById,
+  getBlogForEdit,
   updateBlog,
   deleteBlog,
   getDashboardStats,
@@ -117,6 +118,13 @@ router.post(
 router.get(
   "/comments/:blogId",
   getComments
+);
+
+router.get(
+  "/:id/edit",
+  protect,
+  authorize("author"),
+  getBlogForEdit
 );
 
 router.get(

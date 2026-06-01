@@ -122,10 +122,22 @@ exports.rejectBlog = async (req, res) => {
 //published blogs
 exports.getPublishedBlogs = async (req, res) => {
   try {
+    const { search, category } = req.query;
 
-    const blogs = await Blog.find({
-      status: "approved"
-    }).populate(
+    // Build filter object
+    const filter = { status: "approved" };
+
+    // Add search filter (case-insensitive title search)
+    if (search && search.trim()) {
+      filter.title = { $regex: search.trim(), $options: "i" };
+    }
+
+    // Add category filter
+    if (category && category.trim()) {
+      filter.category = category.trim();
+    }
+
+    const blogs = await Blog.find(filter).populate(
       "author",
       "name"
     );
@@ -154,6 +166,32 @@ exports.getBlogById = async (req, res) => {
     res.json(blog);
   } catch (error) {
     res.status(500).json(error.message);
+  }
+};
+
+// Get blog for editing (author only)
+exports.getBlogForEdit = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id)
+      .populate("author", "name email");
+
+    if (!blog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+    if (blog.author._id.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only edit your own blogs",
+      });
+    }
+
+    res.json(blog);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
