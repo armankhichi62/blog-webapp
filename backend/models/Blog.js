@@ -15,7 +15,12 @@ const blogSchema = new mongoose.Schema(
   category: {
     type: String
   },
-
+  
+  image: {
+  type: String,
+  default: ""
+  },
+  
   status: {
     type: String,
     enum: ["draft", "pending", "published","approved", "rejected"],

@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../middleware/uploadMiddleware");
 
 const {
   createBlog,
@@ -28,10 +29,11 @@ const {
 } = require("../middleware/authMiddleware");
 
 router.post(
-  "/create",
-  protect,
-  authorize("author"),
-  createBlog
+"/create",
+protect,
+authorize("author"),
+upload.single("image"),
+createBlog
 );
 
 router.get(
@@ -75,9 +77,10 @@ router.get(
 );
 
 router.put(
-  "/update/:id",
+  "/:id",
   protect,
   authorize("author"),
+  upload.single("image"),
   updateBlog
 );
 

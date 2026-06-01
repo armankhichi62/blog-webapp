@@ -1,14 +1,25 @@
 const mongoose = require("mongoose");
 const Blog = require("../models/Blog");
 const Comment = require("../models/Comment");
+
+
+//create blogs
 //create blogs
 exports.createBlog = async (req, res) => {
   try {
+
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    const image = req.file
+      ? `/uploads/${req.file.filename}`
+      : "";
 
     const blog = await Blog.create({
       title: req.body.title,
       content: req.body.content,
       category: req.body.category,
+      image,
       author: req.user.id
     });
 
@@ -18,7 +29,15 @@ exports.createBlog = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json(error.message);
+
+    console.error("CREATE BLOG ERROR:");
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
 };
 
@@ -217,6 +236,9 @@ exports.updateBlog = async (req, res) => {
     blog.title = req.body.title?.trim() || blog.title;
     blog.content = req.body.content?.trim() || blog.content;
     blog.category = req.body.category?.trim() || blog.category;
+    if (req.file) {
+  blog.image = `/uploads/${req.file.filename}`;
+} 
 
     await blog.save();
 
@@ -230,7 +252,7 @@ exports.updateBlog = async (req, res) => {
   }
 };
 
-//
+//delete blog
 exports.deleteBlog = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
@@ -261,7 +283,7 @@ exports.deleteBlog = async (req, res) => {
 };
 
 
-//
+//dashboard stats for admin dashboard
 exports.getDashboardStats = async (req,res)=>{
 
 try{
@@ -331,7 +353,8 @@ exports.getAuthorAnalytics = async (req, res) => {
           title: 1,
           status: 1,
           likes: 1,
-          commentsCount: 1
+          commentsCount: 1,
+          image: 1
         }
       }
     ]);
@@ -484,16 +507,17 @@ exports.getMyBlogs = async (req, res) => {
         }
       },
       {
-        $project: {
-          _id: 1,
-          title: 1,
-          category: 1,
-          status: 1,
-          likes: 1,
-          commentsCount: 1,
-          content: 1
-        }
-      },
+          $project: {
+            _id: 1,
+            title: 1,
+            category: 1,
+            status: 1,
+            likes: 1,
+            commentsCount: 1,
+            content: 1,
+            image: 1
+          }
+        },
       { $sort: { createdAt: -1 } }
     ]);
 

@@ -11,6 +11,7 @@ export default function CreateBlog() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
+  const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +27,40 @@ export default function CreateBlog() {
     setLoading(true);
 
     try {
-      await api.post("/blog/create", { title: title.trim(), content: content.trim(), category: category.trim() });
+      const formData = new FormData();
+
+formData.append(
+  "title",
+  title.trim()
+);
+
+formData.append(
+  "content",
+  content.trim()
+);
+
+formData.append(
+  "category",
+  category.trim()
+);
+
+if (image) {
+  formData.append(
+    "image",
+    image
+  );
+}
+
+await api.post(
+  "/blog/create",
+  formData,
+  {
+    headers: {
+      "Content-Type":
+        "multipart/form-data"
+    }
+  }
+);
       router.push("/dashboard/myblogs");
     } catch (err: any) {
       setError(err.response?.data?.message || "Unable to create blog. Please try again.");
@@ -116,6 +150,32 @@ export default function CreateBlog() {
                 onChange={(e) => setCategory(e.target.value)}
               />
             </div>
+
+          <div>
+            <label
+              className="block text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Cover Image
+            </label>
+
+            <input
+              type="file"
+              accept="image/*"
+              className="w-full px-4 py-3 rounded-xl border text-sm"
+              style={inputStyle}
+              onChange={(e) =>
+                setImage(e.target.files?.[0] || null)
+              }
+            />
+             {image && (
+              <img
+                src={URL.createObjectURL(image)}
+                alt="Preview"
+                className="mt-3 w-full h-48 object-cover rounded-xl"
+              />
+            )}
+          </div>
 
             <div>
               <label

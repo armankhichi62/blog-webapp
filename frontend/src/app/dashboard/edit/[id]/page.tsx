@@ -13,6 +13,8 @@ export default function EditBlogPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [currentImage, setCurrentImage] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +34,7 @@ export default function EditBlogPage() {
         setTitle(blog.title || "");
         setContent(blog.content || "");
         setCategory(blog.category || "");
+        setCurrentImage(blog.image || "");
       } catch (err: any) {
         setError(err.response?.data?.message || "Unable to load blog for editing.");
       } finally {
@@ -56,7 +59,40 @@ export default function EditBlogPage() {
         title: title.trim(),
         content: content.trim(),
         category: category.trim(),
-      });
+      });const formData = new FormData();
+
+formData.append(
+  "title",
+  title.trim()
+);
+
+formData.append(
+  "content",
+  content.trim()
+);
+
+formData.append(
+  "category",
+  category.trim()
+);
+
+if (image) {
+  formData.append(
+    "image",
+    image
+  );
+}
+
+await api.put(
+  `/blog/update/${blogId}`,
+  formData,
+  {
+    headers: {
+      "Content-Type":
+        "multipart/form-data"
+    }
+  }
+);
       router.push("/dashboard/myblogs");
     } catch (err: any) {
       setError(err.response?.data?.message || "Unable to save changes. Please try again.");
@@ -137,6 +173,45 @@ export default function EditBlogPage() {
                   onChange={(e) => setCategory(e.target.value)}
                 />
               </div>
+                     
+                    <div>
+                      <label
+                        className="block text-xs font-semibold uppercase tracking-wider mb-2"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        Cover Image
+                      </label>
+
+                      {currentImage && !image && (
+                        <img
+                          src={`http://localhost:5000${currentImage}`}
+                          alt="Current Cover"
+                          className="w-full h-48 object-cover rounded-xl mb-3"
+                        />
+                      )}
+
+                      {image && (
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-xl mb-3"
+                        />
+                      )}
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="w-full px-4 py-3 rounded-xl border text-sm"
+                        style={{
+                          background: "var(--bg-elevated)",
+                          borderColor: "var(--bg-border)",
+                          color: "var(--text-primary)"
+                        }}
+                        onChange={(e) =>
+                          setImage(e.target.files?.[0] || null)
+                        }
+                      />
+                    </div>
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>

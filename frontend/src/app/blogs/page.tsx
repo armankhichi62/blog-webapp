@@ -29,6 +29,7 @@ export default function BlogsPage() {
   const [loading, setLoading] = useState(true);
   const [likingId, setLikingId] = useState<string | null>(null);
   const [commentingId, setCommentingId] = useState<string | null>(null);
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
 
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState("");
@@ -172,7 +173,7 @@ console.log(error.response?.data);
       className="page-shell min-h-screen px-4 py-12 sm:px-6 sm:py-16"
       style={{ background: "var(--bg-base)" }}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
 
         {/* Header */}
         <div className="mb-10 text-center animate-fade-up stagger-1">
@@ -275,16 +276,27 @@ console.log(error.response?.data);
             )}
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {blogs.map((blog, i) => (
-              <article
-                key={blog._id}
-                className="surface-card surface-card-hover overflow-hidden animate-fade-up"
-                style={{
-                  animationDelay: `${(i + 4) * 0.05}s`,
-                  opacity: 0,
-                }}
+              <article key={blog._id} className="surface-card surface-card-hover overflow-hidden animate-fade-up" style={{ animationDelay: `${(i + 4) * 0.05}s`,  opacity: 0}}
               >
+                {blog.image && (
+                  <div className="
+                surface-card
+                overflow-hidden
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:shadow-2xl
+                ">
+                <img
+                  src={`http://localhost:5000${blog.image}`}
+                  alt={blog.title}
+                  className="w-full h-52 object-cover hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+            )}
+
                 {/* Article body */}
                 <div className="p-7">
 
@@ -369,6 +381,25 @@ console.log(error.response?.data);
 
                 </div>
 
+                      <div className="px-7 pb-4">
+                        <button
+                          onClick={() =>
+                            setExpandedComments((prev) => ({
+                              ...prev,
+                              [blog._id]: !prev[blog._id],
+                            }))
+                          }
+                          className="text-sm font-medium cursor-pointer"
+                          style={{ color: "var(--primary)" }}
+                        >
+                          {expandedComments[blog._id]
+                            ? "▲ Hide Comments"
+                            : `💬 Comments (${blogComments[blog._id]?.length || 0})`}
+                        </button>
+                      </div>
+
+                      {expandedComments[blog._id] && (
+                        <>
                     {/* Comment Input */}
                     <div
                       className="mx-4 mt-5 rounded-xl p-4 sm:mx-7"
@@ -418,63 +449,64 @@ console.log(error.response?.data);
                           {commentingId === blog._id
                             ? "Posting..."
                             : "Post"}
-                        </button>
+                              </button>
 
-                      </div>
+                            </div>
 
-                    </div>
+                          </div>
 
                                 {/* Comments List */}
                               <div
-  className="mx-4 mb-6 mt-5 sm:mx-7"
-  style={{ borderColor: "var(--bg-border)" }}
->
+                                className="mx-4 mb-6 mt-5 sm:mx-7"
+                                style={{ borderColor: "var(--bg-border)" }}
+                              >
 
-                                <h3
-  className="font-semibold mb-3"
-  style={{ color: "var(--text-primary)" }}
->
-  Comments ({blogComments[blog._id]?.length || 0})
-</h3>
-                                              
-                                {blogComments[blog._id]?.length > 0 ? (
+                                                              <h3
+                                className="font-semibold mb-3"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                Comments ({blogComments[blog._id]?.length || 0})
+                              </h3>
+                                                                            
+                                  {blogComments[blog._id]?.length > 0 ? (
 
-  blogComments[blog._id].map((comment:any) => (
+                                blogComments[blog._id].map((comment:any) => (
 
-    <div
-      key={comment._id}
-      className="rounded-xl border p-4 mb-3"
-      style={{
-        borderColor: "var(--bg-border)",
-        background: "var(--bg-elevated)"
-      }}
-    >
-      <p className="font-semibold">
-        {comment.user?.name}
-      </p>
+                                  <div
+                                    key={comment._id}
+                                    className="rounded-xl border p-4 mb-3"
+                                    style={{
+                                      borderColor: "var(--bg-border)",
+                                      background: "var(--bg-elevated)"
+                                    }}
+                                  >
+                                    <p className="font-semibold">
+                                      {comment.user?.name}
+                                    </p>
 
-      <p>
-        {comment.content}
-      </p>
-    </div>
+                                    <p>
+                                      {comment.content}
+                                    </p>
+                                  </div>
 
-  ))
+                                ))
 
-) : (
+                              ) : (
 
-  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-    <svg className="mx-auto mb-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
-    </svg>
-    <span className="font-semibold text-slate-600">No comments yet</span>
-    <br />
-    Be the first to share a thought.
-  </div>
+                          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+                            <svg className="mx-auto mb-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                            <span className="font-semibold text-slate-600">No comments yet</span>
+                            <br />
+                            Be the first to share a thought.
+                          </div>
 
-)}
+                      )}
 
                 </div>
-
+                </>
+              )}
               </article>
             ))}
           </div>

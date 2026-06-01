@@ -162,7 +162,14 @@ const deleteBlog = async (id:string) => {
                     opacity: 0,
                   }}
                 >
-                  <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+                  <div className="flex flex-col gap-4">
+                    {blog.image && (
+  <img
+    src={`http://localhost:5000${blog.image}`}
+    alt={blog.title}
+    className="w-full h-52 object-cover rounded-xl"
+  />
+)}
                     <div className="flex-1 min-w-0">
                       <h2
                         className="font-semibold text-base mb-1.5 truncate"
