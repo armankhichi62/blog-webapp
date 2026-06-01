@@ -15,6 +15,7 @@ export default function MyBlogs() {
 
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated, loading: authLoading } = useRequireAuth();
    
   //submitforReview
   const submitForReview = async (id:string) => {
@@ -63,8 +64,6 @@ const deleteBlog = async (id:string) => {
 
   const router = useRouter();
 
-  useRequireAuth();
-
   const fetchBlogs = async () => {
     try {
       const res = await api.get("/blog/myblogs");
@@ -77,8 +76,10 @@ const deleteBlog = async (id:string) => {
   };
 
   useEffect(() => {
-    fetchBlogs();
-  }, []);
+    if (!authLoading && isAuthenticated) {
+      fetchBlogs();
+    }
+  }, [authLoading, isAuthenticated]);
 
   return (
     <div

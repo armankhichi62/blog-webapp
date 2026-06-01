@@ -60,22 +60,23 @@ export default function StatsPage() {
 
   const [stats, setStats] = useState<any>({});
   const [loading, setLoading] = useState(true);
-
-    useRequireAuth();
+  const { isAuthenticated, loading: authLoading } = useRequireAuth();
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await api.get("/blog/stats/dashboard");
-        setStats(res.data);
-      } catch (error: any) {
-        console.log(error.response?.data);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, []);
+    if (!authLoading && isAuthenticated) {
+      const fetchStats = async () => {
+        try {
+          const res = await api.get("/blog/stats/dashboard");
+          setStats(res.data);
+        } catch (error: any) {
+          console.log(error.response?.data);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchStats();
+    }
+  }, [authLoading, isAuthenticated]);
 
   const approvedPct = stats.totalBlogs
     ? Math.round((stats.approvedBlogs / stats.totalBlogs) * 100)

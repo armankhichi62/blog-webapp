@@ -6,11 +6,10 @@ import api from "../../../services/api";
 
 export default function PendingBlogs() {
 
+  const { isAuthenticated, loading: authLoading } = useRequireAuth();
   const [blogs, setBlogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<Record<string, string>>({});
-
-  useRequireAuth();
 
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +21,7 @@ export default function PendingBlogs() {
       setError(error.response?.data?.message || "Unable to load pending blogs.");
       console.log(error.response?.data);
     } finally {
-      setLoading(false);
+      setPageLoading(false);
     }
   };
 
@@ -51,8 +50,10 @@ export default function PendingBlogs() {
   };
 
   useEffect(() => {
-    fetchBlogs();
-  }, []);
+    if (!authLoading && isAuthenticated) {
+      fetchBlogs();
+    }
+  }, [authLoading, isAuthenticated]);
 
   return (
     <div
@@ -85,7 +86,7 @@ export default function PendingBlogs() {
             >
               Pending Blogs
             </h1>
-            {!loading && (
+            {!pageLoading && (
               <span
                 className="text-xs font-semibold px-3 py-1.5 rounded-full"
                 style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}
@@ -111,7 +112,7 @@ export default function PendingBlogs() {
             <p className="font-medium mb-1">Unable to load pending blogs.</p>
             <p className="text-sm">Please refresh the page or try again later.</p>
           </div>
-        ) : loading ? (
+        ) : pageLoading ? (
           <div className="flex items-center justify-center py-20">
             <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-muted)" }}>
               <path d="M21 12a9 9 0 1 1-6.219-8.56"/>

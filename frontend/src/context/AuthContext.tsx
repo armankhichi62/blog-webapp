@@ -54,6 +54,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     delete api.defaults.headers.common.Authorization;
   };
 
+  const normalizeUser = (user: any) => {
+    const id = user.id || user._id;
+    return {
+      ...user,
+      id,
+      role: user.role?.toLowerCase(),
+    };
+  };
+
   const refreshProfile = async () => {
     const activeToken = token || (typeof window !== "undefined" ? localStorage.getItem(AUTH_TOKEN_KEY) : null);
     if (!activeToken) return;
@@ -65,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const profile = response.data?.data;
       if (profile) {
-        const normalizedProfile = { ...profile, role: profile.role?.toLowerCase() };
+        const normalizedProfile = normalizeUser(profile);
         setUser(normalizedProfile);
         setSessionStorage(activeToken, normalizedProfile);
       }
@@ -75,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (sessionToken: string, sessionUser: User) => {
-    const normalizedUser = { ...sessionUser, role: sessionUser.role?.toLowerCase() };
+    const normalizedUser = normalizeUser(sessionUser);
     setToken(sessionToken);
     setUser(normalizedUser);
     setSessionStorage(sessionToken, normalizedUser);
@@ -97,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (savedUser) {
         try {
           const parsedUser = JSON.parse(savedUser);
-          setUser({ ...parsedUser, role: parsedUser.role?.toLowerCase() });
+          setUser(normalizeUser(parsedUser));
         } catch {
           setUser(null);
         }

@@ -340,12 +340,30 @@ exports.likeBlog = async (req, res) => {
       });
     }
 
-    blog.likes += 1;
+    const userId = req.user.id.toString();
+    blog.likedBy = Array.isArray(blog.likedBy) ? blog.likedBy : [];
+
+    const alreadyLiked = blog.likedBy.some(
+      (id) => id.toString() === userId
+    );
+
+    if (alreadyLiked) {
+      blog.likedBy = blog.likedBy.filter(
+        (id) => id.toString() !== userId
+      );
+    } else {
+      blog.likedBy.push(userId);
+    }
+
+    blog.likes = blog.likedBy.length;
     await blog.save();
 
     res.json({
       success: true,
-      data: { likes: blog.likes },
+      data: {
+        likes: blog.likes,
+        liked: !alreadyLiked,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

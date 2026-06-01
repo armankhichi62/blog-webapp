@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 export default function BlogsPage() {
+  const { user, isAuthenticated } = useAuth();
 
   const [blogs, setBlogs] = useState<any[]>([]);
   const [comments, setComments] = useState<Record<string, string>>({});
@@ -38,9 +40,9 @@ console.log(error.response?.data);
     try {
       const res = await api.get("/blog/published");
       setBlogs(res.data);
-      res.data.forEach((blog:any)=>{
-fetchComments(blog._id);
-});
+      res.data.forEach((blog: any) => {
+        fetchComments(blog._id);
+      });
     } catch (error: any) {
       console.log(error.response?.data);
     } finally {
@@ -48,11 +50,44 @@ fetchComments(blog._id);
     }
   };
 
+  const hasLiked = (blog: any) => {
+    if (blog.liked) return true;
+    if (!user || !Array.isArray(blog.likedBy)) return false;
+    return blog.likedBy.some(
+      (id: any) => id?.toString() === user.id.toString()
+    );
+  };
+
   const likeBlog = async (id: string) => {
+    if (!isAuthenticated) {
+      alert("Please log in to like blogs.");
+      return;
+    }
+
     try {
       setLikingId(id);
-      await api.put(`/blog/like/${id}`);
-      fetchBlogs();
+      const response = await api.put(`/blog/like/${id}`);
+      const { likes, liked } = response.data.data;
+
+      setBlogs((prev) =>
+        prev.map((blog) => {
+          if (blog._id !== id) return blog;
+
+          const likedBy = Array.isArray(blog.likedBy) ? [...blog.likedBy] : [];
+          const userId = user?.id;
+
+          const nextLikedBy = liked
+            ? Array.from(new Set([...likedBy, userId]))
+            : likedBy.filter((likedUserId: any) => likedUserId?.toString() !== userId);
+
+          return {
+            ...blog,
+            likes,
+            liked,
+            likedBy: nextLikedBy,
+          };
+        })
+      );
     } catch (error: any) {
       console.log(error.response?.data);
     } finally {
@@ -175,8 +210,8 @@ fetchComments(blog._id);
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200 cursor-pointer"
                     style={{
                       background: "transparent",
-                      color: "var(--text-secondary)",
-                      borderColor: "var(--bg-border)",
+                      color: hasLiked(blog) ? "#ef4444" : "var(--text-secondary)",
+                      borderColor: hasLiked(blog) ? "rgba(239,68,68,0.3)" : "var(--bg-border)",
                       opacity: likingId === blog._id ? 0.6 : 1,
                     }}
                     onMouseEnter={(e) => {
@@ -185,8 +220,8 @@ fetchComments(blog._id);
                       (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.08)";
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "var(--bg-border)";
+                      (e.currentTarget as HTMLElement).style.color = hasLiked(blog) ? "#ef4444" : "var(--text-secondary)";
+                      (e.currentTarget as HTMLElement).style.borderColor = hasLiked(blog) ? "rgba(239,68,68,0.3)" : "var(--bg-border)";
                       (e.currentTarget as HTMLElement).style.background = "transparent";
                     }}
                   >
