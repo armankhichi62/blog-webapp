@@ -1,98 +1,171 @@
-const User=require("../models/User");
-const bcrypt=require("bcrypt");
-
-exports.register=async(req,res)=>{
-try{
-
-const {name,email,password,role}=req.body;
-
-const userExists=await User.findOne({email});
-
-if(userExists){
- return res.status(400).json({
-    message:"User already exists"
- });
-}
-
-const hashedPassword=await bcrypt.hash(password,10);
-
-const user=await User.create({
-   name,
-   email,
-   password:hashedPassword,
-   role
-});
-
-res.status(201).json({
- message:"User Registered Successfully"
-});
-
-}
-catch(error){
-res.status(500).json(error.message);
-}
-}
+const User = require("../models/User");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-exports.login = async(req,res)=>{
-try{
+exports.register = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
 
-const {email,password}=req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required",
+      });
+    }
 
-const user=await User.findOne({email});
+    const normalizedEmail = email.trim().toLowerCase();
 
-if(!user){
-return res.status(404).json({
-message:"User not found"
-});
-}
+    const userExists = await User.findOne({ email: normalizedEmail });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
 
-const match=await bcrypt.compare(
-password,
-user.password
-);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-if(!match){
+    const user = await User.create({
+      name: name.trim(),
+      email: normalizedEmail,
+      password: hashedPassword,
+      role: "reader",
+    });
 
-return res.status(400).json({
-message:"Invalid credentials"
-});
-}
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-const token=jwt.sign(
-{
-id:user._id,
-role:user.role
-},
-process.env.JWT_SECRET,
-{
-expiresIn:"7d"
-}
-);
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
 
-res.json({
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
 
-message:"Login Successful",
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
 
-token,
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
-user:{
-id:user._id,
-name:user.name,
-email:user.email,
-role:user.role
-}
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
 
-});
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
-}
+    res.json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-catch(error){
+exports.getProfile = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized",
+      });
+    }
 
-res.status(500).json(
-error.message
-);
+    const user = await User.findById(req.user._id).select("name email role createdAt");
 
-}
+    res.json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-}
+exports.updateProfile = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized",
+      });
+    }
+
+    const { name, email } = req.body;
+    const updateFields = {};
+
+    if (name) {
+      updateFields.name = name.trim();
+    }
+
+    if (email) {
+      const normalizedEmail = email.trim().toLowerCase();
+      const emailTaken = await User.findOne({
+        email: normalizedEmail,
+        _id: { $ne: req.user._id },
+      });
+
+      if (emailTaken) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already in use",
+        });
+      }
+
+      updateFields.email = normalizedEmail;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, updateFields, {
+      new: true,
+      runValidators: true,
+    }).select("name email role createdAt");
+
+    res.json({
+      success: true,
+      data: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

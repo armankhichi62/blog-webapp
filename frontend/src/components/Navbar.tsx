@@ -1,33 +1,25 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-
   const pathname = usePathname();
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  console.log("Token:", token);
-  setIsLoggedIn(!!token);
-}, []);
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-  };
+  const { isAuthenticated, logout } = useAuth();
 
   const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/blogs", label: "Blogs" },
-
-  ...(isLoggedIn
-    ? [{ href: "/dashboard", label: "Dashboard" }]
-    : [{ href: "/login", label: "Login" }]),
-];
+    { href: "/", label: "Home" },
+    { href: "/blogs", label: "Blogs" },
+    ...(isAuthenticated
+      ? [
+          { href: "/dashboard", label: "Dashboard" },
+          { href: "/profile", label: "Profile" },
+        ]
+      : [
+          { href: "/login", label: "Login" },
+          { href: "/register", label: "Register" },
+        ]),
+  ];
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -97,19 +89,19 @@ useEffect(() => {
         </div>
 
         {/* Logout */}
-        {isLoggedIn && (
-  <button
-    onClick={logout}
-    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200 cursor-pointer"
-    style={{
-      color: "var(--text-secondary)",
-      borderColor: "var(--bg-border)",
-      background: "transparent",
-    }}
-  >
-    Logout
-  </button>
-)}
+        {isAuthenticated && (
+          <button
+            onClick={logout}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200 cursor-pointer"
+            style={{
+              color: "var(--text-secondary)",
+              borderColor: "var(--bg-border)",
+              background: "transparent",
+            }}
+          >
+            Logout
+          </button>
+        )}
 
       </div>
     </nav>

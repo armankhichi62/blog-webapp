@@ -1,55 +1,58 @@
+const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
-exports.protect = async(req,res,next)=>{
+exports.protect = async (req, res, next) => {
+  try {
+    let token;
 
-try{
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.toLowerCase().startsWith("bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
 
-let token;
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, token missing",
+      });
+    }
 
-if (
-  req.headers.authorization &&
-  req.headers.authorization.toLowerCase().startsWith("bearer")
-) {
-  token = req.headers.authorization.split(" ")[1];
-}
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
 
-if(!token){
-return res.status(401).json({
-message:"Not authorized"
-});
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, user not found",
+      });
+    }
 
-}
-
-const decoded=jwt.verify(
-token,
-process.env.JWT_SECRET
-);
-
-req.user=decoded;
-next();
-
-}
-catch(error){
-
-res.status(401).json({
-message:"Invalid Token"
-});
-
-}
-
+    user.role = typeof user.role === "string" ? user.role.toLowerCase() : user.role;
+    req.user = user;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
 };
 
-// Role Middleware
 exports.authorize = (...roles) => {
   return (req, res, next) => {
-
-        console.log("User Role:", req.user.role);
-    console.log("Allowed Roles:", roles);
-
+    if (!req.user || !req.user.role) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
 
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
-        message: "Access Denied"
+        success: false,
+        message: "Access denied",
       });
     }
 

@@ -1,32 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useRequireAuth } from "../../../context/AuthContext";
 import api from "../../../services/api";
 
 export default function CreateBlog() {
 
+  const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/login";
-    }
-  }, []);
+  useRequireAuth();
 
   const createBlog = async () => {
+    if (!title.trim() || !content.trim()) {
+      setError("Title and content are required.");
+      return;
+    }
+
+    setError(null);
     setLoading(true);
-    const token = localStorage.getItem("token");
-    await api.post(
-      "/blog/create",
-      { title, content, category },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setLoading(false);
-    alert("Blog Created");
+
+    try {
+      await api.post("/blog/create", { title: title.trim(), content: content.trim(), category: category.trim() });
+      router.push("/dashboard/myblogs");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Unable to create blog. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputStyle = {
@@ -169,6 +175,12 @@ export default function CreateBlog() {
                 )}
               </button>
             </div>
+
+            {error && (
+              <div className="rounded-xl border border-red-500 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
           </div>
         </div>

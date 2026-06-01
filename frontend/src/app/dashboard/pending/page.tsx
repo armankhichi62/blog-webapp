@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRequireAuth } from "../../../context/AuthContext";
 import api from "../../../services/api";
 
 export default function PendingBlogs() {
@@ -9,29 +10,26 @@ export default function PendingBlogs() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/login";
-    }
-  }, []);
+  useRequireAuth();
+
+  const [error, setError] = useState<string | null>(null);
 
   const fetchBlogs = async () => {
-    const token = localStorage.getItem("token");
-    const res = await api.get("/blog/pending", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setBlogs(res.data);
-    setLoading(false);
+    try {
+      const res = await api.get("/blog/pending");
+      setBlogs(res.data?.data || []);
+    } catch (error: any) {
+      setError(error.response?.data?.message || "Unable to load pending blogs.");
+      console.log(error.response?.data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const approveBlog = async (id: string) => {
     try {
       setActionLoading((prev) => ({ ...prev, [id]: "approve" }));
-      const token = localStorage.getItem("token");
-      await api.put(`/blog/approve/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/blog/approve/${id}`, {});
       fetchBlogs();
     } catch (error: any) {
       console.log(error.response?.data);
@@ -43,10 +41,7 @@ export default function PendingBlogs() {
   const rejectBlog = async (id: string) => {
     try {
       setActionLoading((prev) => ({ ...prev, [id]: "reject" }));
-      const token = localStorage.getItem("token");
-      await api.put(`/blog/reject/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/blog/reject/${id}`, {});
       fetchBlogs();
     } catch (error: any) {
       console.log(error.response?.data);
@@ -101,8 +96,22 @@ export default function PendingBlogs() {
           </div>
         </div>
 
+        {error && (
+          <div
+            className="rounded-2xl border p-5 mb-6 text-sm animate-fade-up"
+            style={{ background: "#fef2f2", borderColor: "#fecaca", color: "#b91c1c" }}
+          >
+            {error}
+          </div>
+        )}
+
         {/* Blog list */}
-        {loading ? (
+        {error ? (
+          <div className="rounded-2xl border p-12 text-center animate-fade-up stagger-2" style={{ background: "#fef2f2", borderColor: "#fecaca", color: "#b91c1c" }}>
+            <p className="font-medium mb-1">Unable to load pending blogs.</p>
+            <p className="text-sm">Please refresh the page or try again later.</p>
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center py-20">
             <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-muted)" }}>
               <path d="M21 12a9 9 0 1 1-6.219-8.56"/>

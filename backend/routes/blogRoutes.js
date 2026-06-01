@@ -15,7 +15,7 @@ const {
   likeBlog,
   addComment,
   getComments,
-  getMyBlogs
+  getMyBlogs,
 
 
 } = require("../controllers/postController");
@@ -28,14 +28,14 @@ const {
 router.post(
   "/create",
   protect,
-  authorize("author","admin"),
+  authorize("author","admin","superadmin"),
   createBlog
 );
 
 router.get(
 "/myblogs",
 protect,
-authorize("author","admin"),
+authorize("author","admin","superadmin"),
 getMyBlogs
 );
 
@@ -72,18 +72,18 @@ router.get(
   getPublishedBlogs
 );
 
-
 router.put(
   "/update/:id",
   protect,
-  authorize("author"),
+  authorize("author","admin","superadmin"),
   updateBlog
 );
+
 
 router.delete(
   "/delete/:id",
   protect,
-  authorize("author","admin"),
+  authorize("author","admin","superadmin"),
   deleteBlog
 );
 

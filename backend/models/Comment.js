@@ -1,61 +1,26 @@
-const mongoose=require("mongoose");
+const mongoose = require("mongoose");
 
-const commentSchema=
-new mongoose.Schema({
-
-blog:{
-type:mongoose.Schema.Types.ObjectId,
-ref:"Blog"
-},
-
-user:{
-type:mongoose.Schema.Types.ObjectId,
-ref:"User"
-},
-
-content:{
-type:String,
-required:true
-}
-
-},
-{
-timestamps:true
-}
+const commentSchema = new mongoose.Schema(
+  {
+    blog: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Blog",
+      required: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    content: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
-module.exports=
-mongoose.model(
-"Comment",
-commentSchema
-);
-
-
-//
-exports.addComment = async(req,res)=>{
-
-try{
-
-const comment=
-await Comment.create({
-
-blog:req.params.blogId,
-
-user:req.user.id,
-
-content:req.body.content
-
-});
-
-res.status(201).json(comment);
-
-}
-catch(error){
-
-res.status(500).json(
-error.message
-);
-
-}
-
-};
+module.exports = mongoose.model("Comment", commentSchema);

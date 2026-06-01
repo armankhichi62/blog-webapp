@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState } from "react";
+import { useAuth, useRequireAuth } from "../../context/AuthContext";
 
 const dashboardItems = [
   {
@@ -62,13 +63,32 @@ const dashboardItems = [
 ];
 
 export default function Dashboard() {
+  const { user, loading } = useAuth();
+  const { isAuthenticated } = useRequireAuth();
+  const role = user?.role?.toLowerCase() ?? null;
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/login";
+  if (loading || !isAuthenticated) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--bg-base)" }}
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  const filteredItems = dashboardItems.filter((item) => {
+    if (role === "author") {
+      return item.href !== "/dashboard/pending";
     }
-  }, []);
+
+    if (role === "admin") {
+      return item.href !== "/dashboard/create" && item.href !== "/dashboard/myblogs";
+    }
+
+    return true;
+  });
 
   return (
     <div
@@ -95,7 +115,7 @@ export default function Dashboard() {
 
         {/* Cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {dashboardItems.map((item, i) => (
+          {filteredItems.map((item, i) => (
             <a
               key={item.href}
               href={item.href}

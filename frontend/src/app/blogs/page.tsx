@@ -51,10 +51,7 @@ fetchComments(blog._id);
   const likeBlog = async (id: string) => {
     try {
       setLikingId(id);
-      const token = localStorage.getItem("token");
-      await api.put(`/blog/like/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/blog/like/${id}`);
       fetchBlogs();
     } catch (error: any) {
       console.log(error.response?.data);
@@ -66,12 +63,7 @@ fetchComments(blog._id);
   const addComment = async (id: string) => {
     try {
       setCommentingId(id);
-      const token = localStorage.getItem("token");
-      await api.post(
-        `/blog/comment/${id}`,
-        { content: comments[id] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post(`/blog/comment/${id}`, { content: comments[id] });
       alert("Comment Added");
       fetchComments(id);
       setComments((prev) => ({ ...prev, [id]: "" }));
@@ -208,12 +200,12 @@ fetchComments(blog._id);
 
                     {/* Comment Input */}
                     <div
-  className="mt-5 rounded-xl p-4"
-  style={{
-    background: "rgba(255,255,255,0.02)",
-    border: "1px solid var(--bg-border)"
-  }}
->
+                      className="mt-5 rounded-xl p-4"
+                      style={{
+                        background: "rgba(255,255,255,0.02)",
+                        border: "1px solid var(--bg-border)"
+                      }}
+                    >
 
                       <div className="flex items-center gap-2">
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useRequireAuth } from "../../../context/AuthContext";
 import api from "../../../services/api";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
@@ -14,58 +16,67 @@ export default function MyBlogs() {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
    
+  //submitforReview
   const submitForReview = async (id:string) => {
+    try {
+      await api.put(`/blog/submit/${id}`, {});
+      alert("Blog submitted for review");
+      fetchBlogs();
+    } catch(error:any) {
+      console.log(error.response?.data);
+    }
+  };
 
-  try {
+//delete blog
+const deleteBlog = async (id:string) => {
 
-    const token = localStorage.getItem("token");
-
-    await api.put(
-      `/blog/submit/${id}`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
+  const confirmDelete =
+    window.confirm(
+      "Are you sure you want to delete this blog?"
     );
 
-    alert("Blog submitted for review");
+  if(!confirmDelete){
+    return;
+  }
 
-    window.location.reload();
+  try{
+    await api.delete(`/blog/delete/${id}`);
 
-  } catch(error:any) {
+    alert("Blog Deleted");
 
-    console.log(error.response?.data);
+    setBlogs(
+      blogs.filter(
+        (blog)=>blog._id !== id
+      )
+    );
+
+  }
+  catch(error:any){
+
+    console.log(
+      error.response?.data
+    );
 
   }
 
 };
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/login";
+  const router = useRouter();
+
+  useRequireAuth();
+
+  const fetchBlogs = async () => {
+    try {
+      const res = await api.get("/blog/myblogs");
+      setBlogs(res.data);
+    } catch (error: any) {
+      console.log("Error:", error.response?.data);
+    } finally {
+      setLoading(false);
     }
-  }, []);
-
-  
+  };
 
   useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await api.get("/blog/myblogs", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log("Blogs:", res.data);
-        setBlogs(res.data);
-      } catch (error: any) {
-        console.log("Error:", error.response?.data);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchBlogs();
   }, []);
 
@@ -184,27 +195,51 @@ export default function MyBlogs() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
 
-  <span
+                        <span
     className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full"
     style={{ background: status.bg, color: status.color }}
   >
     {status.label}
   </span>
 
-  {blog.status === "draft" && (
+  <div className="flex items-center gap-2">
     <button
-      onClick={() => submitForReview(blog._id)}
+      onClick={() => router.push(`/dashboard/edit/${blog._id}`)}
       className="px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer"
       style={{
-        background: "var(--accent)",
-        color: "#0d0f14"
+        background: "rgba(59,130,246,0.12)",
+        color: "#3b82f6"
       }}
     >
-      Submit For Review
+      Edit
     </button>
-  )}
 
-</div>
+    {blog.status === "draft" && (
+      <button
+        onClick={() => submitForReview(blog._id)}
+        className="px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer"
+        style={{
+          background: "var(--accent)",
+          color: "#0d0f14"
+        }}
+      >
+        Submit For Review
+      </button>
+    )}
+
+    <button
+      onClick={() => deleteBlog(blog._id)}
+      className="px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer"
+      style={{
+        background: "rgba(239,68,68,0.12)",
+        color: "#ef4444"
+      }}
+    >
+      Delete
+    </button>
+  </div>
+
+                      </div>
                   </div>
                 </div>
               );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRequireAuth } from "../../../context/AuthContext";
 import api from "../../../services/api";
 
 const statCards = [
@@ -60,20 +61,12 @@ export default function StatsPage() {
   const [stats, setStats] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/login";
-    }
-  }, []);
+    useRequireAuth();
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await api.get("/blog/stats/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/blog/stats/dashboard");
         setStats(res.data);
       } catch (error: any) {
         console.log(error.response?.data);
