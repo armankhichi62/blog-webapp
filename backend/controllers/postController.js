@@ -59,6 +59,9 @@ res.status(500).json(error.message);
 
 //pending blogs
 exports.getPendingBlogs = async (req,res)=>{
+const blogs = await Blog.find();
+
+console.log(blogs);
 
 try{
 
@@ -297,7 +300,31 @@ error.message
 };
 
 
-//
+//get commentss
+exports.getComments = async(req,res)=>{
+
+try{
+
+const comments = await Comment.find({
+blog:req.params.blogId
+})
+.populate("user","name")
+.sort({createdAt:-1});
+
+res.status(200).json(comments);
+
+}
+catch(error){
+
+res.status(500).json(
+error.message
+);
+
+}
+
+};
+
+//like blog
 exports.likeBlog = async(req,res)=>{
 
 try{

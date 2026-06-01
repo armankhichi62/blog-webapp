@@ -1,53 +1,218 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../../services/api";
 
-export default function MyBlogs(){
+const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
+  approved: { label: "Approved", color: "#22c55e", bg: "rgba(34,197,94,0.12)" },
+  pending: { label: "Pending", color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
+  rejected: { label: "Rejected", color: "#ef4444", bg: "rgba(239,68,68,0.12)" },
+};
 
-    useEffect(() => {
+export default function MyBlogs() {
 
-  const token = localStorage.getItem("token");
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+   
+  const submitForReview = async (id:string) => {
 
-  if (!token) {
-    window.location.href = "/login";
+  try {
+
+    const token = localStorage.getItem("token");
+
+    await api.put(
+      `/blog/submit/${id}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    alert("Blog submitted for review");
+
+    window.location.reload();
+
+  } catch(error:any) {
+
+    console.log(error.response?.data);
+
   }
 
-}, []);
+};
 
-const [blogs,setBlogs] = useState<any[]>([]);
-
-useEffect(() => {
-
-  const fetchBlogs = async () => {
-
-    try {
-
-      const token = localStorage.getItem("token");
-
-      const res = await api.get(
-        "/blog/myblogs",
-        {
-          headers:{
-            Authorization:`Bearer ${token}`
-          }
-        }
-      );
-
-      console.log("Blogs:", res.data);
-
-      setBlogs(res.data);
-
-    } catch(error:any) {
-
-      console.log("Error:", error.response?.data);
-
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/login";
     }
+  }, []);
 
-  };
+  
 
-  fetchBlogs();
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await api.get("/blog/myblogs", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("Blogs:", res.data);
+        setBlogs(res.data);
+      } catch (error: any) {
+        console.log("Error:", error.response?.data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBlogs();
+  }, []);
 
-},[]);
+  return (
+    <div
+      className="min-h-screen px-6 py-12"
+      style={{ background: "var(--bg-base)" }}
+    >
+      <div className="max-w-4xl mx-auto">
 
+        {/* Header */}
+        <div className="mb-8 animate-fade-up stagger-1">
+          <a
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm mb-5 transition-colors"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"}
+            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back to Dashboard
+          </a>
+          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
+            My Content
+          </p>
+          <div className="flex items-end justify-between">
+            <h1
+              className="text-3xl font-semibold"
+              style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
+            >
+              My Blogs
+            </h1>
+            {!loading && (
+              <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+                {blogs.length} post{blogs.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Blog list */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-muted)" }}>
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+          </div>
+        ) : blogs.length === 0 ? (
+          <div
+            className="rounded-2xl border p-12 text-center animate-fade-up stagger-2"
+            style={{ background: "var(--bg-surface)", borderColor: "var(--bg-border)" }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--bg-elevated)" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ color: "var(--text-muted)" }}>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <p className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>No posts yet</p>
+            <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>Start writing your first blog post</p>
+            <a
+              href="/dashboard/create"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+              style={{ background: "var(--accent)", color: "#0d0f14" }}
+            >
+              Create Post
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {blogs.map((blog, i) => {
+              const status = statusConfig[blog.status?.toLowerCase()] || statusConfig.pending;
+              return (
+                <div
+                  key={blog._id}
+                  className={`rounded-2xl border p-6 transition-all duration-200 animate-fade-up`}
+                  style={{
+                    background: "var(--bg-surface)",
+                    borderColor: "var(--bg-border)",
+                    animationDelay: `${(i + 2) * 0.05}s`,
+                    opacity: 0,
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "var(--bg-elevated)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "var(--bg-surface)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "var(--bg-border)";
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h2
+                        className="font-semibold text-base mb-1.5 truncate"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {blog.title}
+                      </h2>
+                      <p
+                        className="text-sm line-clamp-2 mb-3"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        {blog.content}
+                      </p>
+                      {blog.category && (
+                        <span
+                          className="inline-block text-xs px-2.5 py-1 rounded-lg font-medium"
+                          style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
+                        >
+                          {blog.category}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+
+  <span
+    className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full"
+    style={{ background: status.bg, color: status.color }}
+  >
+    {status.label}
+  </span>
+
+  {blog.status === "draft" && (
+    <button
+      onClick={() => submitForReview(blog._id)}
+      className="px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer"
+      style={{
+        background: "var(--accent)",
+        color: "#0d0f14"
+      }}
+    >
+      Submit For Review
+    </button>
+  )}
+
+</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
 }

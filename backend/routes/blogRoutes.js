@@ -14,6 +14,7 @@ const {
   getDashboardStats,
   likeBlog,
   addComment,
+  getComments,
   getMyBlogs
 
 
@@ -27,7 +28,7 @@ const {
 router.post(
   "/create",
   protect,
-  authorize("author"),
+  authorize("author","admin"),
   createBlog
 );
 
@@ -41,7 +42,7 @@ getMyBlogs
 router.put(
   "/submit/:id",
   protect,
-  authorize("author"),
+  authorize("author","admin"),
   submitForReview
 );
 
@@ -103,6 +104,11 @@ router.post(
   "/comment/:blogId",
   protect,
   addComment
+);
+
+router.get(
+  "/comments/:blogId",
+  getComments
 );
 
 router.get(

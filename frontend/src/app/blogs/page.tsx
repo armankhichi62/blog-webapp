@@ -6,147 +6,318 @@ import api from "../../services/api";
 export default function BlogsPage() {
 
   const [blogs, setBlogs] = useState<any[]>([]);
-  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState<Record<string, string>>({});
+  const [blogComments, setBlogComments] = useState<any>({});
+  const [loading, setLoading] = useState(true);
+  const [likingId, setLikingId] = useState<string | null>(null);
+  const [commentingId, setCommentingId] = useState<string | null>(null);
+
+  const fetchComments = async(blogId:string)=>{
+
+try{
+
+const res = await api.get(
+`/blog/comments/${blogId}`
+);
+
+setBlogComments((prev:any)=>({
+...prev,
+[blogId]:res.data
+}));
+
+}
+catch(error:any){
+
+console.log(error.response?.data);
+
+}
+
+};
 
   const fetchBlogs = async () => {
-
     try {
-
       const res = await api.get("/blog/published");
-
       setBlogs(res.data);
-
+      res.data.forEach((blog:any)=>{
+fetchComments(blog._id);
+});
     } catch (error: any) {
-
       console.log(error.response?.data);
-
+    } finally {
+      setLoading(false);
     }
-
   };
 
   const likeBlog = async (id: string) => {
-
     try {
-
+      setLikingId(id);
       const token = localStorage.getItem("token");
-
-      await api.put(
-        `/blog/like/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
+      await api.put(`/blog/like/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       fetchBlogs();
-
     } catch (error: any) {
-
       console.log(error.response?.data);
-
+    } finally {
+      setLikingId(null);
     }
-
   };
 
   const addComment = async (id: string) => {
-
     try {
-
+      setCommentingId(id);
       const token = localStorage.getItem("token");
-
       await api.post(
         `/blog/comment/${id}`,
-        {
-          content: comment
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { content: comments[id] },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       alert("Comment Added");
-
-      setComment("");
-
+      fetchComments(id);
+      setComments((prev) => ({ ...prev, [id]: "" }));
     } catch (error: any) {
-
       console.log(error.response?.data);
-
+    } finally {
+      setCommentingId(null);
     }
-
   };
 
   useEffect(() => {
-
     fetchBlogs();
-
   }, []);
 
   return (
-  <div className="max-w-5xl mx-auto p-8">
+    <div
+      className="min-h-screen px-6 py-12"
+      style={{ background: "var(--bg-base)" }}
+    >
+      <div className="max-w-3xl mx-auto">
 
-    <h1 className="text-4xl font-bold mb-8 text-center">
-      Published Blogs
-    </h1>
+        {/* Header */}
+        <div className="mb-10 text-center animate-fade-up stagger-1">
+          <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "var(--accent)" }}>
+            Reading
+          </p>
+          <h1
+            className="text-4xl font-semibold mb-3"
+            style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
+          >
+            Published Blogs
+          </h1>
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            Discover stories, ideas, and perspectives from our community.
+          </p>
+        </div>
 
-    {blogs.map((blog) => (
+        {/* Blog list */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-muted)" }}>
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+          </div>
+        ) : blogs.length === 0 ? (
+          <div
+            className="rounded-2xl border p-12 text-center animate-fade-up stagger-2"
+            style={{ background: "var(--bg-surface)", borderColor: "var(--bg-border)" }}
+          >
+            <p className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>No posts yet</p>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Check back soon for new articles</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {blogs.map((blog, i) => (
+              <article
+                key={blog._id}
+                className="rounded-2xl border overflow-hidden animate-fade-up"
+                style={{
+                  background: "var(--bg-surface)",
+                  borderColor: "var(--bg-border)",
+                  animationDelay: `${(i + 2) * 0.05}s`,
+                  opacity: 0,
+                }}
+              >
+                {/* Article body */}
+                <div className="p-7">
 
-      <div
-        key={blog._id}
-        className="border rounded-lg shadow-md p-6 mb-6"
-      >
+                  {/* Category + meta row */}
+                  <div className="flex items-center gap-2 mb-4">
+                    {blog.category && (
+                      <span
+                        className="text-xs font-semibold px-2.5 py-1 rounded-lg"
+                        style={{ background: "var(--accent-glow)", color: "var(--accent)" }}
+                      >
+                        {blog.category}
+                      </span>
+                    )}
+                  </div>
 
-        <h2 className="text-2xl font-bold mb-3">
-          {blog.title}
-        </h2>
+                  {/* Title */}
+                  <h2
+                    className="text-xl font-semibold mb-3 leading-snug"
+                    style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
+                  >
+                    {blog.title}
+                  </h2>
 
-        <p className="mb-3">
-          {blog.content}
-        </p>
+                  {/* Content */}
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {blog.content}
+                  </p>
 
-        <p className="mb-2">
-          <strong>Category:</strong> {blog.category}
-        </p>
+                </div>
 
-        <p className="mb-4">
-          <strong>Likes:</strong> {blog.likes}
-        </p>
+                {/* Divider */}
+                <div className="border-t" style={{ borderColor: "var(--bg-border)" }} />
 
-        <button
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          onClick={() => likeBlog(blog._id)}
-        >
-          👍 Like
-        </button>
+                {/* Actions row */}
+                <div className="px-7 py-4 flex items-center gap-3" style={{ background: "var(--bg-elevated)" }}>
 
-        <br /><br />
+                  {/* Like button */}
+                  <button
+                    onClick={() => likeBlog(blog._id)}
+                    disabled={likingId === blog._id}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200 cursor-pointer"
+                    style={{
+                      background: "transparent",
+                      color: "var(--text-secondary)",
+                      borderColor: "var(--bg-border)",
+                      opacity: likingId === blog._id ? 0.6 : 1,
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "#ef4444";
+                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(239,68,68,0.3)";
+                      (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.08)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "var(--bg-border)";
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    <span>{blog.likes ?? 0}</span>
+                  </button>
 
-        <input
-          className="border p-2 rounded w-64"
-          placeholder="Write Comment"
-          value={comment}
-          onChange={(e) =>
-            setComment(e.target.value)
-          }
-        />
+                </div>
 
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded ml-2 hover:bg-blue-700"
-          onClick={() =>
-            addComment(blog._id)
-          }
-        >
-          Add Comment
-        </button>
+                    {/* Comment Input */}
+                    <div
+  className="mt-5 rounded-xl p-4"
+  style={{
+    background: "rgba(255,255,255,0.02)",
+    border: "1px solid var(--bg-border)"
+  }}
+>
+
+                      <div className="flex items-center gap-2">
+
+                        <input
+                          className="flex-1 px-4 py-2.5 rounded-xl border text-sm"
+                          style={{
+                            background: "var(--bg-surface)",
+                            borderColor: "var(--bg-border)",
+                            color: "var(--text-primary)",
+                          }}
+                          placeholder="Write a comment..."
+                          value={comments[blog._id] || ""}
+                          onChange={(e) =>
+                            setComments((prev) => ({
+                              ...prev,
+                              [blog._id]: e.target.value,
+                            }))
+                          }
+                        />
+
+                        <button
+                          onClick={() => addComment(blog._id)}
+                          disabled={
+                            commentingId === blog._id ||
+                            !comments[blog._id]?.trim()
+                          }
+                          className="px-4 py-2 rounded-xl font-medium"
+                          style={{
+                            background:
+                              commentingId === blog._id
+                                ? "var(--bg-border)"
+                                : "var(--accent)",
+                            color:
+                              commentingId === blog._id
+                                ? "var(--text-muted)"
+                                : "#0d0f14",
+                          }}
+                        >
+                          {commentingId === blog._id
+                            ? "Posting..."
+                            : "Post"}
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                                {/* Comments List */}
+                              <div
+  className="mt-5"
+  style={{ borderColor: "var(--bg-border)" }}
+>
+
+                                <h3
+  className="font-semibold mb-3"
+  style={{ color: "var(--text-primary)" }}
+>
+  Comments ({blogComments[blog._id]?.length || 0})
+</h3>
+                                              
+                                {blogComments[blog._id]?.length > 0 ? (
+
+  blogComments[blog._id].map((comment:any) => (
+
+    <div
+      key={comment._id}
+      className="rounded-xl border p-4 mb-3"
+      style={{
+        borderColor: "var(--bg-border)",
+        background: "rgba(255,255,255,0.02)"
+      }}
+    >
+      <p className="font-semibold">
+        {comment.user?.name}
+      </p>
+
+      <p>
+        {comment.content}
+      </p>
+    </div>
+
+  ))
+
+) : (
+
+  <div
+  className="text-center py-4 text-sm"
+  style={{ color: "var(--text-muted)" }}
+>
+  No comments yet.
+  <br />
+  Be the first to comment.
+</div>
+
+)}
+
+                </div>
+
+              </article>
+            ))}
+          </div>
+        )}
 
       </div>
-
-    ))}
-
-  </div>
-);
+    </div>
+  );
 }
