@@ -120,16 +120,15 @@ export default function PendingBlogs() {
           </div>
         ) : blogs.length === 0 ? (
           <div
-            className="rounded-2xl border p-12 text-center animate-fade-up stagger-2"
-            style={{ background: "var(--bg-surface)", borderColor: "var(--bg-border)" }}
+            className="surface-card p-12 text-center animate-fade-up stagger-2"
           >
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--bg-elevated)" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ color: "var(--text-muted)" }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(34,197,94,0.12)" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="1.8">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
-            <p className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>All clear!</p>
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No posts waiting for review</p>
+            <p className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>Review queue is clear</p>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>There are no pending blogs to review right now.</p>
           </div>
         ) : (
           <div className="space-y-4">

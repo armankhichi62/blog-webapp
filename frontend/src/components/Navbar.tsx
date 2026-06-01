@@ -47,7 +47,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <a href="/" className="group flex items-center gap-2.5" onClick={() => setMenuOpen(false)}>
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-sm font-black text-white shadow-md shadow-blue-200 transition-transform group-hover:scale-105">

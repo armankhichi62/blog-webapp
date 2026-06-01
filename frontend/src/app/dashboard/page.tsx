@@ -15,8 +15,8 @@ const dashboardItems = [
     ),
     label: "Create Blog",
     description: "Write and publish a new post",
-    accent: "var(--accent)",
-    accentBg: "var(--accent-glow)",
+    accent: "#2563eb",
+    accentBg: "rgba(37,99,235,0.12)",
   },
   {
     href: "/dashboard/myblogs",
@@ -31,8 +31,8 @@ const dashboardItems = [
     ),
     label: "My Blogs",
     description: "Manage all your blog posts",
-    accent: "#3b82f6",
-    accentBg: "rgba(59,130,246,0.12)",
+    accent: "#4f46e5",
+    accentBg: "rgba(79,70,229,0.12)",
   },
   {
     href: "/dashboard/pending",
@@ -154,7 +154,7 @@ export default function Dashboard() {
                   { label: 'Comments Received', value: authorStats?.totalCommentsReceived ?? 0 }
                 ].map((card) => (
                   <div key={card.label} className="surface-card surface-card-hover flex min-h-32 flex-col items-start justify-between p-5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-sm font-black text-blue-600">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-base font-black text-blue-600 shadow-sm">
                       {card.label.charAt(0)}
                     </div>
                     <div>
@@ -178,8 +178,14 @@ export default function Dashboard() {
                     <div className="mt-1 inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-bold capitalize text-green-700">{b.status}</div>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-2"><span>👍</span><span className="font-medium">{b.likes ?? 0}</span></div>
-                    <div className="flex items-center gap-2"><span>💬</span><span className="font-medium">{b.commentsCount ?? 0}</span></div>
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                      <span className="font-medium">{b.likes ?? 0}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+                      <span className="font-medium">{b.commentsCount ?? 0}</span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -197,7 +203,7 @@ export default function Dashboard() {
                 }}
               >
                 <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm"
                   style={{ background: item.accentBg, color: item.accent }}
                 >
                   {item.icon}

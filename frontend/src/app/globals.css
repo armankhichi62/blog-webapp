@@ -33,7 +33,14 @@ html {
 
 body {
   min-height: 100vh;
-  background: var(--bg-base);
+  body {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f8fafc 55%,
+    #eef2ff 100%
+  );
+}
   color: var(--text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;

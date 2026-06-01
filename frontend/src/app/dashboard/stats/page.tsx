@@ -158,7 +158,7 @@ export default function StatsPage() {
               {statCards.map((card, i) => (
                 <div
                   key={card.key}
-                  className="surface-card surface-card-hover p-5 animate-fade-up"
+                  className="surface-card surface-card-hover relative overflow-hidden p-6 animate-fade-up"
                   style={{
                     animationDelay: `${(i + 2) * 0.05}s`,
                     opacity: 0,
@@ -166,7 +166,7 @@ export default function StatsPage() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center"
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm"
                       style={{ background: card.bg, color: card.color }}
                     >
                       {card.icon}

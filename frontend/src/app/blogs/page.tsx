@@ -218,7 +218,8 @@ console.log(error.response?.data);
               style={{
                 background: selectedCategory === null ? "var(--primary)" : "var(--bg-surface)",
                 color: selectedCategory === null ? "#ffffff" : "var(--text-secondary)",
-                border: selectedCategory === null ? "none" : `1px solid var(--bg-border)`,
+                border: selectedCategory === null ? "1px solid var(--accent)" : `1px solid var(--bg-border)`,
+                boxShadow: selectedCategory === null ? "0 6px 14px rgba(37,99,235,0.18)" : "none",
               }}
             >
               All
@@ -231,7 +232,8 @@ console.log(error.response?.data);
                 style={{
                   background: selectedCategory === category ? "var(--primary)" : "var(--bg-surface)",
                   color: selectedCategory === category ? "#ffffff" : "var(--text-secondary)",
-                  border: selectedCategory === category ? "none" : `1px solid var(--bg-border)`,
+                  border: selectedCategory === category ? "1px solid var(--accent)" : `1px solid var(--bg-border)`,
+                  boxShadow: selectedCategory === category ? "0 6px 14px rgba(37,99,235,0.18)" : "none",
                 }}
               >
                 {category}
@@ -330,6 +332,7 @@ console.log(error.response?.data);
                   </div>
 
                   {/* Like button */}
+                  <div className="flex items-center gap-2">
                   <button
                     onClick={() => likeBlog(blog._id)}
                     disabled={likingId === blog._id}
@@ -356,6 +359,13 @@ console.log(error.response?.data);
                     </svg>
                     <span>{blog.likes ?? 0}</span>
                   </button>
+                  <span className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-500">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                    </svg>
+                    {blogComments[blog._id]?.length ?? blog.commentsCount ?? 0}
+                  </span>
+                  </div>
 
                 </div>
 
@@ -452,14 +462,14 @@ console.log(error.response?.data);
 
 ) : (
 
-  <div
-  className="text-center py-4 text-sm"
-  style={{ color: "var(--text-muted)" }}
->
-  No comments yet.
-  <br />
-  Be the first to comment.
-</div>
+  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+    <svg className="mx-auto mb-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+    </svg>
+    <span className="font-semibold text-slate-600">No comments yet</span>
+    <br />
+    Be the first to share a thought.
+  </div>
 
 )}
 
