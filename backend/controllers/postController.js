@@ -1,5 +1,5 @@
 const Blog = require("../models/Blog");
-
+const Comment = require("../models/Comment");
 //create blogs
 exports.createBlog = async (req, res) => {
   try {
@@ -323,5 +323,32 @@ error.message
 );
 
 }
+
+};
+
+
+
+
+
+//
+exports.getMyBlogs = async (req,res) => {
+
+  try {
+
+    let blogs;
+
+    if(req.user.role === "admin"){
+      blogs = await Blog.find();
+    } else {
+      blogs = await Blog.find({
+        author:req.user.id
+      });
+    }
+
+    res.json(blogs);
+
+  } catch(error){
+    res.status(500).json(error.message);
+  }
 
 };

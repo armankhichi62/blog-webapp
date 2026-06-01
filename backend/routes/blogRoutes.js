@@ -13,7 +13,8 @@ const {
   deleteBlog,
   getDashboardStats,
   likeBlog,
-  addComment
+  addComment,
+  getMyBlogs
 
 
 } = require("../controllers/postController");
@@ -28,6 +29,13 @@ router.post(
   protect,
   authorize("author"),
   createBlog
+);
+
+router.get(
+"/myblogs",
+protect,
+authorize("author","admin"),
+getMyBlogs
 );
 
 router.put(
@@ -47,14 +55,14 @@ router.get(
 router.put(
   "/approve/:id",
   protect,
-  authorize("admin"),
+  authorize("admin","superadmin"),
   approveBlog
 );
 
 router.put(
   "/reject/:id",
   protect,
-  authorize("admin"),
+  authorize("admin","superadmin"),
   rejectBlog
 );
 
@@ -63,10 +71,6 @@ router.get(
   getPublishedBlogs
 );
 
-router.get(
-  "/:id",
-  getBlogById
-);
 
 router.put(
   "/update/:id",
@@ -100,6 +104,12 @@ router.post(
   protect,
   addComment
 );
+
+router.get(
+  "/:id",
+  getBlogById
+);
+
 
 
 module.exports = router;
