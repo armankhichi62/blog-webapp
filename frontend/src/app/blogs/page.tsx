@@ -314,12 +314,14 @@ console.log(error.response?.data);
                   </div>
 
                   {/* Title */}
+                  <a href={`/blogs/${blog._id}`}>
                   <h2
                     className="text-2xl font-semibold mb-3 leading-snug"
                     style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
                   >
                     {blog.title}
                   </h2>
+                  </a>
 
                   {/* Content */}
                   <p

@@ -17,7 +17,11 @@ const {
   getAuthorAnalytics,
   likeBlog,
   addComment,
+  getAllComments,
   getComments,
+  deleteComment,
+  addBookmark,
+  getBookmarks,
   getMyBlogs,
 
 
@@ -117,10 +121,36 @@ router.post(
   protect,
   addComment
 );
+console.log("getAllComments =", getAllComments);
+router.get(
+  "/comments",
+  protect,
+  authorize("admin"),
+  getAllComments
+);
 
 router.get(
   "/comments/:blogId",
   getComments
+);
+
+router.delete(
+  "/comment/:id",
+  protect,
+  authorize("admin"),
+  deleteComment
+);
+
+router.post(
+"/bookmark/:blogId",
+protect,
+addBookmark
+);
+
+router.get(
+"/bookmarks",
+protect,
+getBookmarks
 );
 
 router.get(

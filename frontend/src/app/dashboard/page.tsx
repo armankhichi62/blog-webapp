@@ -35,6 +35,22 @@ const dashboardItems = [
     accentBg: "rgba(79,70,229,0.12)",
   },
   {
+  href: "/dashboard/bookmarks",
+  icon: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+    </svg>
+  ),
+  label: "Bookmarks",
+  description: "View your saved blogs",
+  accent: "#ec4899",
+  accentBg: "rgba(236,72,153,0.12)",
+},
+  {
     href: "/dashboard/pending",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -47,6 +63,22 @@ const dashboardItems = [
     accent: "#f59e0b",
     accentBg: "rgba(245,158,11,0.12)",
   },
+  {
+  href: "/admin/comments",
+  icon: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+  ),
+  label: "Comments",
+  description: "Manage user comments",
+  accent: "#7c3aed",
+  accentBg: "rgba(124,58,237,0.12)",
+},
   {
     href: "/dashboard/stats",
     icon: (
@@ -104,7 +136,7 @@ export default function Dashboard() {
 
   const filteredItems = dashboardItems.filter((item) => {
     if (role === "author") {
-      return item.href !== "/dashboard/pending" && item.href !== "/dashboard/stats";
+      return item.href !== "/dashboard/pending" && item.href !== "/dashboard/stats" && item.href === "/dashboard/bookmarks";
     }
 
     if (role === "admin") {
@@ -136,6 +168,27 @@ export default function Dashboard() {
             Manage your blog, review submissions, and track your growth.
           </p>
         </div>
+        <div className="surface-card p-6 mb-8 flex items-center gap-4">
+  <div
+    className="h-14 w-14 rounded-full flex items-center justify-center bg-blue-600 text-white font-bold text-xl"
+  >
+    {user?.name?.charAt(0)}
+  </div>
+
+  <div>
+    <h3 className="font-semibold text-lg">
+      {user?.name}
+    </h3>
+
+    <p className="text-sm text-slate-500">
+      {user?.email}
+    </p>
+
+    <span className="inline-block mt-1 px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">
+      {user?.role}
+    </span>
+  </div>
+</div>
 
         {/* Cards grid */}
         {role === 'author' ? (

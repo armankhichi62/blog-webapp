@@ -25,6 +25,7 @@ export default function Navbar() {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/dashboard/create", label: "Write" },
     { href: "/dashboard/myblogs", label: "My Blogs" },
+     { href: "/dashboard/bookmarks", label: "Bookmarks" },
   ];
 
   const adminLinks = [
@@ -33,6 +34,7 @@ export default function Navbar() {
     { href: "/dashboard/pending", label: "Reviews" },
     { href: "/dashboard/stats", label: "Analytics" },
     { href: "/dashboard", label: "Dashboard" },
+    {href: "/admin/comments", label: "Comments"},
   ];
 
   const navLinks = isAuthenticated

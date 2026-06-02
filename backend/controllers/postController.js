@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Blog = require("../models/Blog");
 const Comment = require("../models/Comment");
-
+const Bookmark = require("../models/Bookmark");
 
 //create blogs
 //create blogs
@@ -170,7 +170,7 @@ exports.getPublishedBlogs = async (req, res) => {
   }
 };
 
-//
+//getBlogByID
 exports.getBlogById = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id)
@@ -214,7 +214,7 @@ exports.getBlogForEdit = async (req, res) => {
   }
 };
 
-//
+//update blogs
 exports.updateBlog = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
@@ -284,46 +284,46 @@ exports.deleteBlog = async (req, res) => {
 
 
 //dashboard stats for admin dashboard
-exports.getDashboardStats = async (req,res)=>{
+// Dashboard stats for admin dashboard
+exports.getDashboardStats = async (req, res) => {
+  try {
 
-try{
+    const totalBlogs = await Blog.countDocuments();
 
-const totalBlogs =
-await Blog.countDocuments();
+    const approvedBlogs = await Blog.countDocuments({
+      status: "approved"
+    });
 
-const approvedBlogs =
-await Blog.countDocuments({
-status:"approved"
-});
+    const pendingBlogs = await Blog.countDocuments({
+      status: "pending"
+    });
 
-const pendingBlogs =
-await Blog.countDocuments({
-status:"pending"
-});
+    const rejectedBlogs = await Blog.countDocuments({
+      status: "rejected"
+    });
 
-const rejectedBlogs =
-await Blog.countDocuments({
-status:"rejected"
-});
+    // NEW
+    const allBlogs = await Blog.find();
 
-res.json({
+    const totalLikes = allBlogs.reduce(
+      (sum, blog) => sum + (blog.likes || 0),
+      0
+    );
 
-totalBlogs,
-approvedBlogs,
-pendingBlogs,
-rejectedBlogs
+    const totalComments = await Comment.countDocuments();
 
-});
+    res.json({
+      totalBlogs,
+      approvedBlogs,
+      pendingBlogs,
+      rejectedBlogs,
+      totalLikes,
+      totalComments
+    });
 
-}
-catch(error){
-
-res.status(500).json(
-error.message
-);
-
-}
-
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
 };
 
 // Author analytics for author dashboard
@@ -385,7 +385,7 @@ exports.getAuthorAnalytics = async (req, res) => {
 };
 
 
-//
+//add comment in blog
 exports.addComment = async(req,res)=>{
 
 try{
@@ -439,6 +439,41 @@ error.message
 
 };
 
+//get all comments for admin dashboard
+exports.getAllComments = async (req, res) => {
+  try {
+    const comments = await Comment.find()
+      .populate("user", "name")
+      .populate("blog", "title");
+
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
+//delete commmentby admin
+exports.deleteComment = async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.id);
+
+    if (!comment) {
+      return res.status(404).json({
+        message: "Comment not found",
+      });
+    }
+
+    await Comment.findByIdAndDelete(req.params.id);
+
+    res.json({
+      message: "Comment deleted successfully",
+    });
+
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
 //like blog
 exports.likeBlog = async (req, res) => {
   try {
@@ -481,11 +516,70 @@ exports.likeBlog = async (req, res) => {
   }
 };
 
+//add bokmark for blogs
+exports.addBookmark = async(req,res)=>{
+
+try{
+
+const existingBookmark = await Bookmark.findOne({
+user:req.user.id,
+blog:req.params.blogId
+});
+
+if(existingBookmark){
+
+return res.status(400).json({
+message:"Already bookmarked"
+});
+
+}
+
+const bookmark = await Bookmark.create({
+user:req.user.id,
+blog:req.params.blogId
+});
+
+res.status(201).json({
+message:"Blog bookmarked",
+bookmark
+});
+
+}
+catch(error){
+
+res.status(500).json({
+message:error.message
+});
+
+}
+
+};
+
+//get bookmark for  blogs
+exports.getBookmarks = async(req,res)=>{
+
+try{
+
+const bookmarks = await Bookmark.find({
+user:req.user.id
+})
+.populate("blog");
+
+res.json(bookmarks);
+
+}
+catch(error){
+
+res.status(500).json({
+message:error.message
+});
+
+}
+
+};
 
 
-
-
-//
+//get my blogs for author dashboard 
 exports.getMyBlogs = async (req, res) => {
   try {
     const authorId = req.user.id || req.user._id;

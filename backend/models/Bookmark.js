@@ -1,22 +1,25 @@
-const mongoose=require("mongoose");
+const mongoose = require("mongoose");
 
-const bookmarkSchema=
-new mongoose.Schema({
+const bookmarkSchema = new mongoose.Schema(
+{
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
+        required:true
+    },
 
-user:{
-type:mongoose.Schema.Types.ObjectId,
-ref:"User"
+    blog:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Blog",
+        required:true
+    }
 },
-
-blog:{
-type:mongoose.Schema.Types.ObjectId,
-ref:"Blog"
+{
+    timestamps:true
 }
+);
 
-});
-
-module.exports=
-mongoose.model(
-"Bookmark",
-bookmarkSchema
+module.exports = mongoose.model(
+    "Bookmark",
+    bookmarkSchema
 );

@@ -61,38 +61,38 @@ export default function EditBlogPage() {
         category: category.trim(),
       });const formData = new FormData();
 
-formData.append(
-  "title",
-  title.trim()
-);
+        formData.append(
+          "title",
+          title.trim()
+        );
 
-formData.append(
-  "content",
-  content.trim()
-);
+        formData.append(
+          "content",
+          content.trim()
+        );
 
-formData.append(
-  "category",
-  category.trim()
-);
+        formData.append(
+          "category",
+          category.trim()
+        );
 
-if (image) {
-  formData.append(
-    "image",
-    image
-  );
-}
+        if (image) {
+          formData.append(
+            "image",
+            image
+          );
+        }
 
-await api.put(
-  `/blog/update/${blogId}`,
-  formData,
-  {
-    headers: {
-      "Content-Type":
-        "multipart/form-data"
-    }
-  }
-);
+        await api.put(
+          `/blog/update/${blogId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type":
+                "multipart/form-data"
+            }
+          }
+        );
       router.push("/dashboard/myblogs");
     } catch (err: any) {
       setError(err.response?.data?.message || "Unable to save changes. Please try again.");
